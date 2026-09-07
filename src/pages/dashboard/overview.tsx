@@ -1,188 +1,323 @@
-import { mockIdentity, mockBuilds, mockBuilders, mockEvents, mockActivity, mockOpportunities } from "@/data/mock";
-import { ArrowRight, Plus, ExternalLink, Activity, Users, Calendar, Folder } from "lucide-react";
+import {
+  currentUser,
+  getProjectsForBuilder,
+  getContributionsForBuilder,
+  mockBuilders,
+  mockContributions,
+  statusTextColors,
+  getProjectById,
+  getBuilderById
+} from "@/data/mock";
+import { ArrowRight, Plus, Zap, Clock } from "lucide-react";
 import { Link } from "wouter";
 
-export function DashboardOverview() {
+function StatusBadge({ status }: { status: string }) {
+  const color = statusTextColors[status as keyof typeof statusTextColors] || "#999";
   return (
-    <div className="space-y-10 pb-10">
-      {/* Welcome Section */}
-      <section className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-          Welcome back, <span className="font-serif italic text-[#89AACC]">{mockIdentity.name.split(' ')[0]}</span>.
-        </h1>
-        <p className="text-[#878787] font-mono text-sm uppercase tracking-widest">
-          {mockIdentity.membership} // {mockIdentity.campus}
-        </p>
+    <span
+      className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
+      style={{ color, borderColor: `${color}40`, background: `${color}10` }}
+    >
+      {status}
+    </span>
+  );
+}
+
+export function DashboardOverview() {
+  const myProjects = getProjectsForBuilder(currentUser.id);
+  const myContributions = getContributionsForBuilder(currentUser.id);
+  const suggestedBuilders = mockBuilders.filter(
+    (b) => !b.isCurrentUser && !currentUser.projectIds.includes(b.id)
+  ).slice(0, 3);
+
+  const recentNetwork = mockContributions
+    .filter((c) => c.builderId !== currentUser.id)
+    .slice(0, 4);
+
+  return (
+    <div className="space-y-10">
+      {/* Identity Header */}
+      <section className="flex items-start justify-between gap-6 flex-wrap">
+        <div className="flex items-center gap-4">
+          <img
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            className="w-14 h-14 rounded-full border border-[#2A2A2A]"
+          />
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Welcome back,{" "}
+              <em className="font-serif not-italic" style={{ color: "#89AACC" }}>
+                {currentUser.name.split(" ")[0]}
+              </em>
+            </h1>
+            <p className="text-xs font-mono text-[#555] mt-1 tracking-widest">
+              {currentUser.role} · {currentUser.campus}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            href="/app/projects"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#1F1F1F] bg-[#141414] text-xs font-medium text-[#F5F5F5] hover:border-[#89AACC]/50 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5 text-[#89AACC]" />
+            New Project
+          </Link>
+          <Link
+            href="/app/discover"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#1F1F1F] bg-[#141414] text-xs font-medium text-[#878787] hover:text-[#F5F5F5] transition-colors"
+          >
+            Discover
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </section>
 
-      {/* Quick Stats / Actions */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#141414] border border-[#1F1F1F] flex flex-col justify-between">
-          <Folder className="h-5 w-5 text-[#89AACC] mb-4" />
-          <div className="text-2xl font-semibold">{mockBuilds.length}</div>
-          <div className="text-xs text-[#878787] font-mono mt-1">ACTIVE BUILDS</div>
-        </div>
-        <div className="p-5 rounded-2xl bg-[#141414] border border-[#1F1F1F] flex flex-col justify-between">
-          <Users className="h-5 w-5 text-[#89AACC] mb-4" />
-          <div className="text-2xl font-semibold">12</div>
-          <div className="text-xs text-[#878787] font-mono mt-1">CONNECTIONS</div>
-        </div>
-        <div className="p-5 rounded-2xl bg-[#141414] border border-[#1F1F1F] flex flex-col justify-between">
-          <Calendar className="h-5 w-5 text-[#89AACC] mb-4" />
-          <div className="text-2xl font-semibold">{mockEvents.length}</div>
-          <div className="text-xs text-[#878787] font-mono mt-1">UPCOMING EVENTS</div>
-        </div>
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#141414] to-[#1A1A1A] border border-[#1F1F1F] flex flex-col justify-center items-center text-center cursor-pointer hover:border-[#89AACC] transition-colors group">
-          <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center mb-3 group-hover:bg-[#89AACC]/10 transition-colors">
-            <Plus className="h-5 w-5 text-[#89AACC]" />
+      {/* Quick Stats */}
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Active Builds", value: myProjects.length },
+          { label: "Contributions", value: myContributions.length },
+          { label: "Connections", value: 12 },
+          { label: "Achievements", value: currentUser.achievementIds.length }
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="px-5 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F]"
+          >
+            <p className="text-2xl font-semibold">{stat.value}</p>
+            <p className="text-[10px] font-mono text-[#555] mt-1 tracking-wider">
+              {stat.label.toUpperCase()}
+            </p>
           </div>
-          <div className="text-sm font-medium">Start a Build</div>
-        </div>
+        ))}
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column (Wider) */}
+        {/* Left: Projects + Builders */}
         <div className="lg:col-span-2 space-y-10">
-          
-          {/* Question 1: What am I building? */}
-          <section className="space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#89AACC]"></span>
-                What am I building?
+
+          {/* Current Projects */}
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-mono tracking-widest text-[#878787]">
+                CURRENT BUILDS
               </h2>
-              <Link href="/app/builds" className="text-xs font-mono text-[#878787] hover:text-[#F5F5F5] flex items-center gap-1 transition-colors">
-                VIEW ALL <ArrowRight className="h-3 w-3" />
+              <Link
+                href="/app/projects"
+                className="text-[10px] font-mono text-[#555] hover:text-[#878787] flex items-center gap-1 transition-colors"
+              >
+                ALL PROJECTS <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {mockBuilds.map(build => (
-                <div key={build.id} className="p-5 rounded-2xl bg-[#141414] border border-[#1F1F1F] hover:border-[#333] transition-colors flex flex-col h-full group relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ExternalLink className="h-4 w-4 text-[#878787]" />
-                  </div>
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-mono bg-[#1F1F1F] px-2 py-1 rounded text-[#89AACC] tracking-wider uppercase">
-                      {build.status}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">{build.title}</h3>
-                  <p className="text-sm text-[#878787] mb-6 flex-1 line-clamp-2">{build.description}</p>
-                  
-                  <div className="flex items-center justify-between pt-4 border-t border-[#1F1F1F]/50">
-                    <div className="flex -space-x-2">
-                      {[...Array(build.contributors)].map((_, i) => (
-                        <div key={i} className="w-6 h-6 rounded-full bg-[#1F1F1F] border border-[#141414]" />
-                      ))}
+            <div className="space-y-3">
+              {myProjects.map((project) => (
+                <Link key={project.id} href={`/app/projects/${project.id}`}>
+                  <div className="p-5 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <StatusBadge status={project.status} />
+                        </div>
+                        <h3 className="font-medium text-sm group-hover:text-[#89AACC] transition-colors truncate">
+                          {project.title}
+                        </h3>
+                        <p className="text-xs text-[#555] mt-1 line-clamp-1">
+                          {project.tagline}
+                        </p>
+                      </div>
+                      <div className="flex -space-x-1.5 shrink-0">
+                        {project.members.slice(0, 3).map((m) => {
+                          const b = getBuilderById(m.builderId);
+                          return b ? (
+                            <img
+                              key={b.id}
+                              src={b.avatar}
+                              alt={b.name}
+                              className="w-6 h-6 rounded-full border border-[#141414]"
+                            />
+                          ) : null;
+                        })}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      {build.tags.slice(0, 2).map(tag => (
-                        <span key={tag} className="text-[10px] text-[#878787] font-mono border border-[#1F1F1F] rounded px-1.5 py-0.5">
-                          {tag}
+                    <div className="flex gap-1.5 mt-4 flex-wrap">
+                      {project.techStack.slice(0, 4).map((t) => (
+                        <span
+                          key={t}
+                          className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5"
+                        >
+                          {t}
                         </span>
                       ))}
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </section>
 
-          {/* Question 2: Who am I building with? */}
-          <section className="space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#89AACC]"></span>
-                Who am I building with?
+          {/* Suggested Builders */}
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-mono tracking-widest text-[#878787]">
+                BUILDERS YOU MIGHT KNOW
               </h2>
-              <Link href="/app/network" className="text-xs font-mono text-[#878787] hover:text-[#F5F5F5] flex items-center gap-1 transition-colors">
-                NETWORK <ArrowRight className="h-3 w-3" />
+              <Link
+                href="/app/builders"
+                className="text-[10px] font-mono text-[#555] hover:text-[#878787] flex items-center gap-1 transition-colors"
+              >
+                ALL BUILDERS <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {mockBuilders.map(builder => (
-                <div key={builder.id} className="p-4 rounded-2xl bg-[#141414] border border-[#1F1F1F] flex flex-col items-center text-center group cursor-pointer hover:border-[#333] transition-colors">
-                  <img src={builder.avatar} alt={builder.name} className="w-16 h-16 rounded-full mb-3 grayscale group-hover:grayscale-0 transition-all border border-[#1F1F1F]" />
-                  <div className="font-medium text-sm mb-1">{builder.name}</div>
-                  <div className="text-[10px] font-mono text-[#878787] mb-1">{builder.role}</div>
-                  <div className="text-xs text-[#555]">{builder.campus}</div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {suggestedBuilders.map((builder) => (
+                <Link key={builder.id} href={`/app/builders/${builder.id}`}>
+                  <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
+                    <img
+                      src={builder.avatar}
+                      alt={builder.name}
+                      className="w-12 h-12 rounded-full mx-auto mb-3 border border-[#2A2A2A] group-hover:border-[#89AACC]/40 transition-colors"
+                    />
+                    <p className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">
+                      {builder.name}
+                    </p>
+                    <p className="text-[9px] font-mono text-[#555] mt-0.5">
+                      {builder.role}
+                    </p>
+                    <p className="text-[9px] text-[#444] mt-0.5">{builder.campus}</p>
+                    <div className="flex flex-wrap gap-1 justify-center mt-3">
+                      {builder.skills.slice(0, 2).map((s) => (
+                        <span
+                          key={s.name}
+                          className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5"
+                        >
+                          {s.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Right: Activity Feed */}
+        <div className="space-y-8">
+          {/* Recent Contributions */}
+          <section>
+            <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
+              NETWORK ACTIVITY
+            </h2>
+            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+              {recentNetwork.map((c, i) => {
+                const builder = getBuilderById(c.builderId);
+                const project = getProjectById(c.projectId);
+                return (
+                  <div
+                    key={c.id}
+                    className={`p-4 flex gap-3 ${i < recentNetwork.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}
+                  >
+                    {builder && (
+                      <img
+                        src={builder.avatar}
+                        alt={builder.name}
+                        className="w-7 h-7 rounded-full border border-[#2A2A2A] shrink-0 mt-0.5"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs text-[#ccc] leading-snug">
+                        <span className="font-medium">{builder?.name}</span>{" "}
+                        contributed to{" "}
+                        <span className="text-[#89AACC]">{project?.title}</span>
+                      </p>
+                      <p className="text-[9px] text-[#555] font-mono mt-1">
+                        {c.type} · {c.date}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Quick Actions */}
+          <section>
+            <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
+              QUICK ACTIONS
+            </h2>
+            <div className="space-y-2">
+              {[
+                { label: "Start a new project", href: "/app/projects", icon: Zap },
+                { label: "Find collaborators", href: "/app/discover", icon: Plus },
+                { label: "Browse showcase", href: "/app/showcase", icon: ArrowRight }
+              ].map((action) => (
+                <Link key={action.label} href={action.href}>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#1F1F1F] bg-[#141414] hover:border-[#89AACC]/30 cursor-pointer group transition-colors">
+                    <action.icon className="h-4 w-4 text-[#555] group-hover:text-[#89AACC] transition-colors" />
+                    <span className="text-sm text-[#878787] group-hover:text-[#F5F5F5] transition-colors">
+                      {action.label}
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 text-[#333] ml-auto group-hover:text-[#555] transition-colors" />
+                  </div>
+                </Link>
               ))}
             </div>
           </section>
 
-        </div>
-        
-        {/* Right Column (Sidebar) */}
-        <div className="space-y-10">
-          
-          {/* Question 3: What's happening next? */}
-          <section className="space-y-5">
-            <h2 className="text-xl font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#89AACC]"></span>
-              What's happening next?
+          {/* My Contributions */}
+          <section>
+            <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
+              MY RECENT CONTRIBUTIONS
             </h2>
-            
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-2xl p-1">
-              <div className="px-4 py-3 border-b border-[#1F1F1F]">
-                <h3 className="text-xs font-mono tracking-widest text-[#878787]">UPCOMING EVENTS</h3>
-              </div>
-              <div className="divide-y divide-[#1F1F1F]">
-                {mockEvents.map(event => (
-                  <div key={event.id} className="p-4 hover:bg-[#1A1A1A] transition-colors cursor-pointer group">
-                    <div className="flex gap-4">
-                      <div className="w-12 h-12 rounded border border-[#1F1F1F] bg-[#0A0A0A] flex flex-col items-center justify-center shrink-0 group-hover:border-[#89AACC]/50 transition-colors">
-                        <span className="text-[10px] text-[#878787] font-mono">{event.date.split(' ')[0]}</span>
-                        <span className="text-sm font-bold">{event.date.split(' ')[1]}</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium mb-1 group-hover:text-[#89AACC] transition-colors">{event.title}</div>
-                        <div className="text-xs text-[#878787] font-mono">{event.type}</div>
-                      </div>
+            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+              {myContributions.slice(0, 3).map((c, i) => {
+                const project = getProjectById(c.projectId);
+                return (
+                  <div
+                    key={c.id}
+                    className={`p-4 ${i < 2 ? "border-b border-[#1F1F1F]" : ""}`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">
+                        {c.type}
+                      </span>
+                      <span className="text-[9px] text-[#444] font-mono">
+                        <Clock className="inline h-2.5 w-2.5 mr-1" />
+                        {c.date}
+                      </span>
                     </div>
+                    <p className="text-xs font-medium text-[#ccc] leading-snug">
+                      {c.title}
+                    </p>
+                    <p className="text-[9px] text-[#555] mt-0.5">
+                      {project?.title}
+                    </p>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-2xl p-1">
-              <div className="px-4 py-3 border-b border-[#1F1F1F]">
-                <h3 className="text-xs font-mono tracking-widest text-[#878787]">RECENT ACTIVITY</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                {mockActivity.map(activity => (
-                  <div key={activity.id} className="flex gap-3 items-start">
-                    <div className="mt-1"><Activity className="h-3.5 w-3.5 text-[#555]" /></div>
-                    <div>
-                      <p className="text-sm text-[#ccc] leading-snug">{activity.message}</p>
-                      <span className="text-[10px] text-[#555] font-mono mt-1 block">{activity.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-2xl p-1">
-              <div className="px-4 py-3 border-b border-[#1F1F1F]">
-                <h3 className="text-xs font-mono tracking-widest text-[#878787]">OPPORTUNITIES</h3>
-              </div>
-              <div className="divide-y divide-[#1F1F1F]">
-                {mockOpportunities.map(opp => (
-                  <div key={opp.id} className="p-4 hover:bg-[#1A1A1A] transition-colors cursor-pointer group">
-                    <div className="text-[10px] text-[#89AACC] font-mono mb-1">{opp.type}</div>
-                    <div className="text-sm font-medium mb-1 group-hover:text-white transition-colors">{opp.title}</div>
-                    <div className="text-xs text-[#878787]">{opp.organization}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
           </section>
         </div>
       </div>
     </div>
+  );
+}
+
+function ChevronRight({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
   );
 }

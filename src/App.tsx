@@ -671,6 +671,12 @@ function Home() {
 
 import { DashboardShell } from "@/pages/dashboard/shell";
 import { DashboardOverview } from "@/pages/dashboard/overview";
+import { DiscoverPage } from "@/pages/dashboard/discover";
+import { BuildersPage, BuilderDetailPage } from "@/pages/dashboard/builders";
+import { ProjectsPage, ProjectDetailPage } from "@/pages/dashboard/projects";
+import { TeamsPage, TeamDetailPage } from "@/pages/dashboard/teams";
+import { ShowcasePage } from "@/pages/dashboard/showcase";
+import { ProfilePage } from "@/pages/dashboard/profile";
 
 function Router() {
   return (
@@ -681,9 +687,18 @@ function Router() {
           <DashboardShell>
             <Switch>
               <Route path="/" component={DashboardOverview} />
+              <Route path="/discover" component={DiscoverPage} />
+              <Route path="/builders/:id" component={BuilderDetailPage} />
+              <Route path="/builders" component={BuildersPage} />
+              <Route path="/projects/:id" component={ProjectDetailPage} />
+              <Route path="/projects" component={ProjectsPage} />
+              <Route path="/teams/:id" component={TeamDetailPage} />
+              <Route path="/teams" component={TeamsPage} />
+              <Route path="/showcase" component={ShowcasePage} />
+              <Route path="/profile" component={ProfilePage} />
               <Route>
                 <div className="flex h-[50vh] items-center justify-center text-[#878787] font-mono text-sm">
-                  WORK IN PROGRESS
+                  PAGE NOT FOUND
                 </div>
               </Route>
             </Switch>
@@ -694,6 +709,7 @@ function Router() {
     </RoutedErrorBoundary>
   );
 }
+
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
