@@ -669,11 +669,26 @@ function Home() {
   );
 }
 
+import { DashboardShell } from "@/pages/dashboard/shell";
+import { DashboardOverview } from "@/pages/dashboard/overview";
+
 function Router() {
   return (
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/app" nested>
+          <DashboardShell>
+            <Switch>
+              <Route path="/" component={DashboardOverview} />
+              <Route>
+                <div className="flex h-[50vh] items-center justify-center text-[#878787] font-mono text-sm">
+                  WORK IN PROGRESS
+                </div>
+              </Route>
+            </Switch>
+          </DashboardShell>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
