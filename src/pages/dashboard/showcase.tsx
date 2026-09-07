@@ -1,31 +1,60 @@
-import { mockProjects, mockBuilders, getBuilderById, statusTextColors } from "@/data/mock";
+import { useState } from "react";
+import { mockBuilders, getBuilderById, statusTextColors } from "@/data/mock";
+import { useAppStore } from "@/store/AppStore";
 import { Link } from "wouter";
 import { ExternalLink, GitBranch, Star } from "lucide-react";
 
-const shippedProjects = mockProjects.filter((p) => p.status === "SHIPPED" || p.status === "MAINTAINED");
-const allShownProjects = mockProjects.filter((p) => p.status !== "IDEA" && p.status !== "VALIDATING");
-
 export function ShowcasePage() {
+  const { state } = useAppStore();
+  const [filter, setFilter] = useState<"ALL" | "SHIPPED" | "MAINTAINED">("ALL");
+
+  const featured = state.projects.filter((p) =>
+    p.status === "SHIPPED" || p.status === "MAINTAINED"
+  );
+
+  const activeBuild = state.projects.filter(
+    (p) => p.status === "BUILDING" || p.status === "BETA"
+  );
+
+  const displayFeatured = featured.filter(
+    (p) => filter === "ALL" || p.status === filter
+  );
+
   return (
     <div className="space-y-12">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Star className="h-4 w-4 text-[#89AACC]" />
-          <span className="text-xs font-mono text-[#89AACC] tracking-widest">SHOWCASE</span>
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Star className="h-4 w-4 text-[#89AACC]" />
+            <span className="text-xs font-mono text-[#89AACC] tracking-widest">SHOWCASE</span>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">Builder Work</h1>
+          <p className="text-sm text-[#555] mt-1">
+            {featured.length} shipped project{featured.length !== 1 ? "s" : ""} across the INIT network.
+          </p>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">Builder Work</h1>
-        <p className="text-sm text-[#555] mt-1">
-          Projects shipped, maintained, and in progress by INIT builders.
-        </p>
+        {/* Filter */}
+        <div className="flex gap-1 p-1 bg-[#141414] border border-[#1F1F1F] rounded-xl">
+          {(["ALL", "SHIPPED", "MAINTAINED"] as const).map((f) => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-mono whitespace-nowrap transition-colors ${
+                filter === f ? "bg-[#0A0A0A] text-[#F5F5F5] border border-[#2A2A2A]" : "text-[#555] hover:text-[#878787]"
+              }`}>
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Shipped / Featured */}
-      {shippedProjects.length > 0 && (
+      {displayFeatured.length > 0 ? (
         <section>
-          <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">SHIPPED</h2>
+          <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">
+            {filter === "ALL" ? "SHIPPED & MAINTAINED" : filter}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {shippedProjects.map((project) => {
+            {displayFeatured.map((project) => {
               const owner = getBuilderById(project.ownerId);
               const color = statusTextColors[project.status] || "#3ACA7A";
               return (
@@ -42,7 +71,11 @@ export function ShowcasePage() {
 
                   <div className="p-5 bg-[#141414]">
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <h3 className="text-lg font-medium">{project.title}</h3>
+                      <Link href={`/app/projects/${project.id}`}>
+                        <h3 className="text-lg font-medium hover:text-[#89AACC] transition-colors cursor-pointer">
+                          {project.title}
+                        </h3>
+                      </Link>
                       <div className="flex gap-1.5 shrink-0">
                         {project.repoUrl && (
                           <a href={`https://${project.repoUrl}`} target="_blank" rel="noreferrer"
@@ -60,7 +93,7 @@ export function ShowcasePage() {
                     </div>
                     <p className="text-sm text-[#555] mb-4">{project.tagline}</p>
 
-                    {/* Builders */}
+                    {/* Team */}
                     <div className="flex items-center gap-2 mb-4">
                       <div className="flex -space-x-1.5">
                         {project.members.slice(0, 4).map((m) => {
@@ -72,8 +105,10 @@ export function ShowcasePage() {
                         })}
                       </div>
                       {owner && (
-                        <span className="text-xs text-[#555]">by {owner.name}
-                          {project.members.length > 1 ? ` + ${project.members.length - 1} more` : ""}</span>
+                        <span className="text-xs text-[#555]">
+                          by {owner.name}
+                          {project.members.length > 1 ? ` + ${project.members.length - 1} more` : ""}
+                        </span>
                       )}
                     </div>
 
@@ -89,15 +124,18 @@ export function ShowcasePage() {
             })}
           </div>
         </section>
+      ) : (
+        <div className="text-center py-16 text-[#444] font-mono text-sm">
+          No {filter !== "ALL" ? filter.toLowerCase() : "shipped"} projects yet.
+        </div>
       )}
 
-      {/* All Active Projects */}
-      <section>
-        <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">ALL ACTIVE BUILDS</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allShownProjects
-            .filter((p) => !shippedProjects.includes(p))
-            .map((project) => {
+      {/* Active Builds */}
+      {activeBuild.length > 0 && filter === "ALL" && (
+        <section>
+          <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">ACTIVE BUILDS</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activeBuild.map((project) => {
               const color = statusTextColors[project.status] || "#999";
               return (
                 <Link key={project.id} href={`/app/projects/${project.id}`}>
@@ -123,25 +161,28 @@ export function ShowcasePage() {
                 </Link>
               );
             })}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* Builder Highlights */}
-      <section>
-        <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">FEATURED BUILDERS</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {mockBuilders.map((builder) => (
-            <Link key={builder.id} href={`/app/builders/${builder.id}`}>
-              <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
-                <img src={builder.avatar} alt={builder.name}
-                  className="w-12 h-12 rounded-full mx-auto mb-2 border border-[#2A2A2A] group-hover:border-[#89AACC]/40 transition-colors" />
-                <p className="text-xs font-medium group-hover:text-[#89AACC] transition-colors truncate">{builder.name}</p>
-                <p className="text-[8px] font-mono text-[#444] mt-0.5">{builder.role}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {filter === "ALL" && (
+        <section>
+          <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">FEATURED BUILDERS</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {mockBuilders.map((builder) => (
+              <Link key={builder.id} href={`/app/builders/${builder.id}`}>
+                <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
+                  <img src={builder.avatar} alt={builder.name}
+                    className="w-12 h-12 rounded-full mx-auto mb-2 border border-[#2A2A2A] group-hover:border-[#89AACC]/40 transition-colors" />
+                  <p className="text-xs font-medium group-hover:text-[#89AACC] transition-colors truncate">{builder.name}</p>
+                  <p className="text-[8px] font-mono text-[#444] mt-0.5">{builder.role}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

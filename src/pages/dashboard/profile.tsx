@@ -1,27 +1,35 @@
 import {
   currentUser,
-  getProjectsForBuilder,
-  getContributionsForBuilder,
   mockAchievements,
   getProjectById,
-  statusTextColors
+  statusTextColors,
 } from "@/data/mock";
-import { GitBranch, X as XIcon, Globe, Link2, Pencil } from "lucide-react";
+import { useAppStore } from "@/store/AppStore";
+import { GitBranch, X as XIcon, Globe, Pencil, Check } from "lucide-react";
 
 const SKILL_LEVEL_COLORS = {
   LEARNING: "#555",
   PROFICIENT: "#89AACC",
-  EXPERT: "#3ACA7A"
+  EXPERT: "#3ACA7A",
 };
 
 const SKILL_LEVEL_ORDER = { EXPERT: 0, PROFICIENT: 1, LEARNING: 2 };
 
 export function ProfilePage() {
-  const projects = getProjectsForBuilder(currentUser.id);
-  const contributions = getContributionsForBuilder(currentUser.id);
+  const { state } = useAppStore();
+
+  // Live data from store
+  const projects = state.projects.filter((p: any) =>
+    p.members.some((m: any) => m.builderId === currentUser.id)
+  );
+  const contributions = state.contributions.filter(
+    (c: any) => c.builderId === currentUser.id
+  );
   const achievements = mockAchievements.filter((a) =>
     currentUser.achievementIds.includes(a.id)
   );
+  const connectionCount = (state.connections as Set<string>).size;
+
   const sortedSkills = [...currentUser.skills].sort(
     (a, b) => SKILL_LEVEL_ORDER[a.level] - SKILL_LEVEL_ORDER[b.level]
   );
@@ -62,7 +70,7 @@ export function ProfilePage() {
               {currentUser.social.twitter && (
                 <a href={`https://twitter.com/${currentUser.social.twitter}`} target="_blank" rel="noreferrer"
                   className="flex items-center gap-1.5 text-xs text-[#555] hover:text-[#F5F5F5] transition-colors">
-                  <Twitter className="h-3.5 w-3.5" /> @{currentUser.social.twitter}
+                  <XIcon className="h-3.5 w-3.5" /> @{currentUser.social.twitter}
                 </a>
               )}
               {currentUser.social.portfolio && (
@@ -81,15 +89,49 @@ export function ProfilePage() {
         {[
           { label: "Projects", value: projects.length },
           { label: "Contributions", value: contributions.length },
-          { label: "Achievements", value: achievements.length },
-          { label: "Member Since", value: currentUser.joinedAt }
+          { label: "Connections", value: connectionCount },
+          { label: "Member Since", value: currentUser.joinedAt },
         ].map((s) => (
           <div key={s.label} className="px-4 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F]">
             <p className="text-xl font-semibold">{s.value}</p>
-            <p className="text-[9px] font-mono text-[#555] mt-1 tracking-wider">{s.label.toUpperCase()}</p>
+            <p className="text-[9px] font-mono text-[#555] mt-1 tracking-wider">
+              {String(s.label).toUpperCase()}
+            </p>
           </div>
         ))}
       </div>
+
+      {/* Applications */}
+      {state.applications.length > 0 && (
+        <section>
+          <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">APPLICATIONS</h2>
+          <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+            {state.applications.map((app: any, i: number) => {
+              const team = state.teams.find((t: any) => t.id === app.teamId);
+              return (
+                <div key={app.id} className={`px-4 py-3 flex items-center justify-between ${i < state.applications.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                  <div>
+                    <p className="text-sm font-medium text-[#ccc]">{app.role}</p>
+                    <p className="text-xs text-[#555] mt-0.5">{team?.name || "Unknown team"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-mono text-[#444]">{app.appliedAt}</span>
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
+                      app.status === "PENDING"
+                        ? "text-[#C9A830] border-[#C9A830]/30 bg-[#C9A830]/5"
+                        : app.status === "APPROVED"
+                        ? "text-[#3ACA7A] border-[#3ACA7A]/30 bg-[#3ACA7A]/5"
+                        : "text-[#888] border-[#888]/30 bg-[#888]/5"
+                    }`}>
+                      {app.status}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Projects + Contributions */}
@@ -99,7 +141,7 @@ export function ProfilePage() {
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">PROJECTS</h2>
             {projects.length > 0 ? (
               <div className="space-y-3">
-                {projects.map((project) => {
+                {projects.map((project: any) => {
                   const color = statusTextColors[project.status] || "#999";
                   return (
                     <div key={project.id} className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] flex items-center justify-between gap-4">
@@ -112,7 +154,7 @@ export function ProfilePage() {
                         <p className="text-xs text-[#555] mt-0.5">{project.tagline}</p>
                       </div>
                       <div className="flex flex-wrap gap-1 shrink-0">
-                        {project.techStack.slice(0, 2).map((t) => (
+                        {project.techStack.slice(0, 2).map((t: string) => (
                           <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
                         ))}
                       </div>
@@ -130,7 +172,7 @@ export function ProfilePage() {
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">CONTRIBUTIONS</h2>
             {contributions.length > 0 ? (
               <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
-                {contributions.map((c, i) => {
+                {contributions.map((c: any, i: number) => {
                   const project = getProjectById(c.projectId);
                   return (
                     <div key={c.id} className={`p-4 ${i < contributions.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
@@ -139,9 +181,7 @@ export function ProfilePage() {
                         <span className="text-[9px] font-mono text-[#444]">{c.date}</span>
                       </div>
                       <p className="text-sm font-medium text-[#ccc]">{c.title}</p>
-                      <p className="text-xs text-[#555] mt-0.5">
-                        {project?.title}
-                      </p>
+                      <p className="text-xs text-[#555] mt-0.5">{project?.title}</p>
                     </div>
                   );
                 })}
@@ -176,8 +216,7 @@ export function ProfilePage() {
             {achievements.length > 0 ? (
               <div className="space-y-2">
                 {achievements.map((ach) => (
-                  <div key={ach.id}
-                    className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F]">
+                  <div key={ach.id} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F]">
                     <span className="text-xl shrink-0">{ach.icon}</span>
                     <div>
                       <p className="text-xs font-medium text-[#ccc]">{ach.title}</p>
