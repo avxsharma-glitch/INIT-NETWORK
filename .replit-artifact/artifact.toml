@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "INIT Network"
+description = "A premium single-page landing page for INIT Network, a coding-first community for ambitious student builders who learn, collaborate, ship, and lead."
+version = "1.0.0"
+id = "artifacts/init-network"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19886
+
+[services.development]
+run = "pnpm --filter @workspace/init-network run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/init-network", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/init-network/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19886"
+BASE_PATH = "/"
