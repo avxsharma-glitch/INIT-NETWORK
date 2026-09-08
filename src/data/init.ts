@@ -7,6 +7,8 @@ export const externalLinks = {
   linkedin: 'https://www.linkedin.com',
   instagram: 'https://www.instagram.com',
   x: 'https://x.com',
+  email: 'mailto:hello@init.network',
+  collaborate: 'https://example.com/init-collaborate',
 } as const;
 
 export const initData = {
@@ -85,7 +87,50 @@ export const initData = {
     { label: 'Discord', href: externalLinks.discord },
     { label: 'X', href: externalLinks.x },
   ],
+  contactOptions: [
+    {
+      id: 'general',
+      badge: '01 / EMAIL',
+      title: 'General Enquiries',
+      description: 'Whether you have questions about INIT, our mission, or just want to connect with the team.',
+      actionLabel: 'Say Hello',
+      href: externalLinks.email,
+      type: 'EMAIL',
+      icon: 'mail',
+    },
+    {
+      id: 'collaborate',
+      badge: '02 / PARTNERSHIP',
+      title: 'Collaborate',
+      description: 'Partner with INIT for builder events, hackathons, or ecosystem builds across campuses.',
+      actionLabel: 'Work With INIT',
+      href: externalLinks.collaborate,
+      type: 'COLLABORATE',
+      icon: 'handshake',
+    },
+    {
+      id: 'chapter',
+      badge: '03 / CAMPUS',
+      title: 'Start a Chapter',
+      description: 'Bring the builder room to your campus and lead the next generation of student creators.',
+      actionLabel: 'Start a Chapter',
+      href: externalLinks.chapter,
+      type: 'CHAPTER',
+      icon: 'compass',
+    },
+    {
+      id: 'join',
+      badge: '04 / NETWORK',
+      title: 'Join INIT',
+      description: 'Step into the network, meet collaborators who build like you, and ship together in public.',
+      actionLabel: 'Join the Community',
+      href: externalLinks.join,
+      type: 'COMMUNITY',
+      icon: 'users',
+    },
+  ],
 } as const;
 
 export type NetworkNode = (typeof initData.networkNodes)[number];
 export type Exploration = (typeof initData.explorations)[number];
+export type ContactOption = (typeof initData.contactOptions)[number];

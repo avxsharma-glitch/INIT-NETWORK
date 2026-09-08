@@ -2,40 +2,20 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Check, ExternalLink, Menu, MoveUpRight, Plus, X } from 'lucide-react';
+import { ArrowRight, Check, Compass, ExternalLink, Handshake, Mail, Menu, MoveUpRight, Plus, Users, X } from 'lucide-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { initData, externalLinks, type Exploration, type NetworkNode } from '@/data/init';
+import { initData, externalLinks, type Exploration, type NetworkNode, type ContactOption } from '@/data/init';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ParticlesBackground } from '@/components/ParticlesBackground';
 import { BuildersCarousel } from '@/components/landing/BuildersCarousel';
 
 const queryClient = new QueryClient();
 gsap.registerPlugin(ScrollTrigger);
 
-function useReveal<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setVisible(true);
-        observer.disconnect();
-      }
-    }, { threshold: 0.12 });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
 
 function LoadingScreen() {
   const [progress, setProgress] = useState(0);
@@ -72,6 +52,20 @@ function LoadingScreen() {
 
 function LogoMark() {
   return <span className="brand-lockup" aria-label="INIT"><span className="brand-mark">I</span><span className="brand-name">INIT</span></span>;
+}
+
+function FadeIn({ children, className, delay = 0, once = true }: { children: ReactNode; className?: string; delay?: number; once?: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 34, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once, margin: '-10%' }}
+      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 function InteractionLayer() {
@@ -147,6 +141,7 @@ function Navbar() {
     { label: 'Builds', href: '#builds' },
     { label: 'Programs', href: '#programs' },
     { label: 'Team', href: '#team' },
+    { label: 'Contact', href: '#contact' },
   ];
 
   useEffect(() => {
@@ -183,27 +178,60 @@ function Hero() {
     return () => window.clearInterval(interval);
   }, []);
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
+    show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
+
   return (
     <section className="hero" id="home" aria-labelledby="hero-heading">
       <div className="hero-orbit" aria-hidden="true" />
-      <div className="container-wide hero-content">
-        <div className="hero-eyebrow">THE BUILDERS NETWORK</div>
-        <h1 id="hero-heading">Everyone wants to <span className="serif-italic">build something.</span><br />Few actually do.</h1>
-        <p className="hero-description">For the ones who decide to start.</p>
-        <div className="hero-role" aria-live="polite">For <strong key={initData.roles[roleIndex]}>{initData.roles[roleIndex]}.</strong></div>
-        <div className="hero-actions">
+      <motion.div 
+        className="container-wide hero-content"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={item} className="hero-eyebrow">THE BUILDERS NETWORK</motion.div>
+        <motion.h1 variants={item} id="hero-heading">Everyone wants to <span className="serif-italic">build something.</span><br />Few actually do.</motion.h1>
+        <motion.p variants={item} className="hero-description">For the ones who decide to start.</motion.p>
+        <motion.div variants={item} className="hero-role" aria-live="polite">
+          For <AnimatePresence mode="wait"><motion.strong key={initData.roles[roleIndex]} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>{initData.roles[roleIndex]}</motion.strong></AnimatePresence>.
+        </motion.div>
+        <motion.div variants={item} className="hero-actions">
           <a className="button-primary" href={externalLinks.join} target="_blank" rel="noreferrer" data-testid="link-hero-join">Join INIT <ArrowRight size={15} /></a>
           <a className="button-secondary" href="#network" data-testid="link-hero-explore">Find your people</a>
-        </div>
-      </div>
-      <div className="scroll-cue" aria-hidden="true">Scroll to enter</div>
-      <div className="hero-bottom">
+        </motion.div>
+      </motion.div>
+      <motion.div 
+        className="scroll-cue" aria-hidden="true"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 1 }}
+      >
+        Scroll to enter
+      </motion.div>
+      <motion.div 
+        className="hero-bottom"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="container-wide status-strip" aria-label="INIT Network status">
           <div className="status-item"><span className="status-dot" /> INIT NETWORK / ONLINE</div>
           {initData.status.map((item) => <div className="status-item" key={item}>{item}</div>)}
           <div className="status-item">BUILDING <Check size={11} /></div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -221,12 +249,13 @@ function TrustStrip() {
 }
 
 function Manifesto() {
-  const { ref, visible } = useReveal<HTMLDivElement>();
   return (
     <section className="section manifesto" aria-labelledby="manifesto-heading">
-      <div ref={ref} className={`manifesto-copy reveal ${visible ? 'is-visible' : ''}`} id="manifesto-heading">
-        <span>You have the idea.</span><br /> The ambition.<br /><em className="serif-italic">But building alone is hard.</em>
-      </div>
+      <FadeIn className="manifesto-copy reveal is-visible">
+        <div id="manifesto-heading">
+          <span>You have the idea.</span><br /> The ambition.<br /><em className="serif-italic">But building alone is hard.</em>
+        </div>
+      </FadeIn>
     </section>
   );
 }
@@ -235,10 +264,10 @@ function WhatIsInit() {
   return (
     <section className="section what-init" aria-labelledby="what-init-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">03 / THE BELIEF</div><h2 className="section-title" id="what-init-heading">Start without<br /><em>permission.</em></h2></div>
           <p className="section-intro-copy">We believe you shouldn&apos;t wait for permission to start.</p>
-        </div>
+        </FadeIn>
         <div className="what-init__grid">
           <div className="what-init__statement">The first move is yours. The next one is easier when someone is <em className="serif-italic">building beside you.</em></div>
           <div className="what-init__signals">
@@ -260,10 +289,10 @@ function Network() {
   return (
     <section className="section" id="network" aria-labelledby="network-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">04 / INIT</div><h2 className="section-title" id="network-heading">INIT — a network<br /><em>for people who build.</em></h2></div>
           <p className="section-intro-copy">Find your people. Learn together. Build together.</p>
-        </div>
+        </FadeIn>
         <div className="network-layout">
           <div className="network-copy">
             <h3>A network for people who build.</h3>
@@ -295,10 +324,10 @@ function Chapters() {
   return (
     <section className="section chapters-section" id="chapters" aria-labelledby="chapters-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">08 / CHAPTERS</div><h2 className="section-title" id="chapters-heading">From one builder<br /><em>to a network.</em></h2></div>
           <p className="section-intro-copy">One builder becomes a team. One team becomes a campus. One campus becomes a network.</p>
-        </div>
+        </FadeIn>
         <div className="chapters-grid">
           {initData.chapters.map((chapter, index) => <article className="chapter-card glass-hover" key={chapter.code}>
             <div className="chapter-card__top"><span>0{index + 1}</span><span>{chapter.code}</span></div>
@@ -320,10 +349,10 @@ function Builds() {
   return (
     <section className="section" id="builds" aria-labelledby="builds-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">07 / BUILDS</div><h2 className="section-title" id="builds-heading">Ideas become projects.<br /><em>Projects become products.</em></h2></div>
           <p className="section-intro-copy">The work gets better when it leaves the notebook and meets the world.</p>
-        </div>
+        </FadeIn>
         <div className="builds-grid">
           {initData.projects.map((project, index) => <article className="build-card glass-hover" data-cursor-label="OPEN" key={project.title} data-testid={`card-project-${index}`}>
             <div className={`build-visual ${project.visual}`} aria-hidden="true" />
@@ -368,10 +397,10 @@ function Programs() {
   return (
     <section className="section" id="programs" aria-labelledby="programs-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">09 / OPPORTUNITIES</div><h2 className="section-title" id="programs-heading">Build. Lead.<br /><em>Contribute.</em></h2></div>
           <p className="section-intro-copy">Build. Lead. Contribute. Start a chapter.</p>
-        </div>
+        </FadeIn>
         <div className="program-grid">
           {initData.programs.map((program, index) => <article className={`program-card glass-hover ${open === index ? 'is-open' : ''}`} key={program.number}>
             <div className="program-number">{program.number}</div>
@@ -387,7 +416,6 @@ function Programs() {
 }
 
 function Community() {
-  const { ref, visible } = useReveal<HTMLDivElement>();
   return (
     <section className="section community" aria-labelledby="community-heading">
       <div className="container-wide">
@@ -397,9 +425,9 @@ function Community() {
             <h2 className="section-title" id="community-heading">One builder<br /><em>becomes a team.</em></h2>
             <p>One team becomes a campus. One campus becomes a network. The next point starts with someone deciding to show up.</p>
           </div>
-          <div ref={ref} className={`collage reveal ${visible ? 'is-visible' : ''}`} aria-label="Abstract community collage">
+          <FadeIn className="collage reveal is-visible" aria-label="Abstract community collage">
             {['Late night lab', 'Field notes', 'Open questions', 'Demo day', 'Ship log', 'New signal'].map((label) => <div className="collage-tile" key={label}><span className="collage-label">{label}</span></div>)}
-          </div>
+          </FadeIn>
         </div>
         <div className="stats-row" aria-label="INIT Network metrics">
           {initData.stats.map((stat) => <div className="stat" key={stat.label}><div className="stat-value" data-testid={`stat-${stat.label.toLowerCase()}`}>{stat.value}</div><div className="stat-label">{stat.label}</div></div>)}
@@ -413,10 +441,10 @@ function Events() {
   return (
     <section className="section events-section" id="events" aria-labelledby="events-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">09 / OPPORTUNITIES</div><h2 className="section-title" id="events-heading">There is always<br /><em>a way in.</em></h2></div>
           <p className="section-intro-copy">Show up, take a turn, and make the next thing easier for someone else.</p>
-        </div>
+        </FadeIn>
         <div className="events-list">
           {initData.events.map((event, index) => <article className="event-row glass-hover" key={event.title}>
             <span className="event-row__index">0{index + 1}</span>
@@ -448,10 +476,10 @@ function Impact() {
   return (
     <section className="section impact-section" id="impact" aria-labelledby="impact-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">09 / OPPORTUNITIES</div><h2 className="section-title" id="impact-heading">The signal<br /><em>keeps growing.</em></h2></div>
           <p className="section-intro-copy">Every number starts with a builder who decided to contribute.</p>
-        </div>
+        </FadeIn>
         <div className="stats-row impact-stats" aria-label="INIT Network impact metrics">
           {initData.stats.map((stat) => <div className="stat glass-hover" key={stat.label}><div className="stat-value" data-testid={`impact-stat-${stat.label.toLowerCase()}`}>{stat.value}</div><div className="stat-label">{stat.label}</div></div>)}
         </div>
@@ -464,10 +492,10 @@ function JoinTeam() {
   return (
     <section className="section positions-section" id="positions" aria-labelledby="positions-heading">
       <div className="container-wide">
-        <div className="section-intro">
+        <FadeIn className="section-intro">
           <div><div className="section-label">09 / OPPORTUNITIES</div><h2 className="section-title" id="positions-heading">Start a chapter.<br /><em>Lead the room.</em></h2></div>
           <p className="section-intro-copy">Build. Lead. Contribute. Start a chapter.</p>
-        </div>
+        </FadeIn>
         <div className="positions-list">
           {initData.positions.map((position, index) => <a className="position-row glass-hover" href={externalLinks.join} target="_blank" rel="noreferrer" key={position.title} data-cursor-label="APPLY">
             <span className="position-row__number">0{index + 1}</span>
@@ -482,15 +510,14 @@ function JoinTeam() {
 }
 
 function WhyInit() {
-  const { ref, visible } = useReveal<HTMLDivElement>();
   return (
     <section className="section" aria-labelledby="why-heading">
       <div className="container-wide">
         <div className="section-label">05 / THE DIFFERENCE</div>
         <h2 className="section-title" id="why-heading">The work gets<br /><em>better together.</em></h2>
-        <div ref={ref} className={`why-grid reveal ${visible ? 'is-visible' : ''}`}>
+        <FadeIn className="why-grid reveal is-visible">
           {initData.why.map((item, index) => <article className="why-item" key={item.title}><div className="why-item__index">0{index + 1}</div><h3>{item.title}</h3><p>{item.text}</p></article>)}
-        </div>
+        </FadeIn>
       </div>
     </section>
   );
@@ -500,7 +527,9 @@ function Explorations({ onOpen }: { onOpen: (item: Exploration, index: number) =
   return (
     <section className="section explorations" id="explorations" aria-labelledby="explore-heading">
       <div className="container-wide explore-sticky">
-        <h2 className="explore-heading" id="explore-heading">This is where<br />ideas get <em className="serif-italic">weird.</em></h2>
+        <FadeIn className="explore-heading">
+          <h2 id="explore-heading">This is where<br />ideas get <em className="serif-italic">weird.</em></h2>
+        </FadeIn>
         <div className="explore-tiles">
           {initData.explorations.map((item, index) => <button className="explore-tile glass-hover" data-cursor-label="ZOOM" key={item.title} onClick={() => onOpen(item, index)} aria-label={`Open exploration: ${item.title}`} data-testid={`button-exploration-${index}`}><span className="explore-tile__index">0{index + 1}</span></button>)}
         </div>
@@ -529,9 +558,11 @@ function Join() {
   return (
     <section className="section join-section" aria-labelledby="join-heading">
       <div className="container-wide">
-        <div className="section-label">10 / FINAL CTA</div>
-        <h2 id="join-heading">What will<br /><em>you build?</em></h2>
-        <p>INIT isn&apos;t something you join. It&apos;s something you build.</p>
+        <FadeIn className="section-intro">
+          <div className="section-label">10 / FINAL CTA</div>
+          <h2 id="join-heading">What will<br /><em>you build?</em></h2>
+          <p>INIT isn&apos;t something you join. It&apos;s something you build.</p>
+        </FadeIn>
         <div className="join-actions">
           <a className="button-primary" href={externalLinks.join} target="_blank" rel="noreferrer" data-testid="link-join-primary">Join INIT <ArrowRight size={15} /></a>
           <a className="button-secondary" href={externalLinks.chapter} target="_blank" rel="noreferrer" data-testid="link-join-chapter">Start a chapter <ExternalLink size={13} /></a>
@@ -541,8 +572,241 @@ function Join() {
   );
 }
 
+function ContactSection() {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full Name is required';
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email Address is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+    }
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    }
+    return newErrors;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[name];
+        return copy;
+      });
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    // Client-side simulation and logging for future backend integration
+    setTimeout(() => {
+      console.log('INIT Contact Form Submission:', formData);
+      setIsSubmitting(false);
+      setSubmitted(true);
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        message: '',
+      });
+      setErrors({});
+    }, 400);
+  };
+
+  return (
+    <section className="section contact-section" id="contact" aria-labelledby="contact-heading">
+      <div className="contact-ambient" aria-hidden="true" />
+      <div className="container-wide" style={{ position: 'relative', zIndex: 2 }}>
+        <FadeIn className="contact-layout">
+          {/* Left Column: Heading, Description & Supporting Text */}
+          <div className="contact-info">
+            <div className="section-label">11 / GET IN TOUCH</div>
+            <h2 className="section-title" id="contact-heading">
+              Get in <span className="serif-italic">Touch.</span>
+            </h2>
+            <p className="contact-description">
+              Have an idea, want to collaborate, or simply want to connect? Drop us a message.
+            </p>
+            <p className="contact-subtext">
+              We&apos;d love to hear what you&apos;re building.
+            </p>
+
+            <div className="contact-meta">
+              <div className="contact-meta-item">
+                <span className="status-dot" />
+                <span>DIRECT INQUIRIES: <a href={externalLinks.email} className="contact-meta-link">hello@init.network</a></span>
+              </div>
+              <div className="contact-meta-item">
+                <span className="status-dot" />
+                <span>RESPONSE: WITHIN 24 HOURS</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Contact Form */}
+          <div className="contact-form-wrap glass-hover">
+            {submitted ? (
+              <motion.div
+                className="contact-success"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                role="status"
+                aria-live="polite"
+              >
+                <div className="contact-success__icon" aria-hidden="true">
+                  <Check size={26} />
+                </div>
+                <h3>Thanks! Your message has been received.</h3>
+                <p>We&apos;d love to hear what you&apos;re building. We&apos;ll get back to you soon.</p>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => setSubmitted(false)}
+                  data-cursor-label="RESET"
+                  data-testid="button-contact-reset"
+                >
+                  Send another message
+                </button>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="contact-form" noValidate>
+                <div className="form-group">
+                  <label htmlFor="contact-fullName" className="form-label">
+                    Full Name <span className="required-star">*</span>
+                  </label>
+                  <input
+                    id="contact-fullName"
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="Enter your name"
+                    className={`form-input ${errors.fullName ? 'has-error' : ''}`}
+                    aria-invalid={!!errors.fullName}
+                    aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+                    disabled={isSubmitting}
+                    data-testid="input-contact-name"
+                  />
+                  {errors.fullName && (
+                    <span id="fullName-error" className="form-error-msg" data-testid="error-contact-name">
+                      {errors.fullName}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-email" className="form-label">
+                    Email Address <span className="required-star">*</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    className={`form-input ${errors.email ? 'has-error' : ''}`}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
+                    disabled={isSubmitting}
+                    data-testid="input-contact-email"
+                  />
+                  {errors.email && (
+                    <span id="email-error" className="form-error-msg" data-testid="error-contact-email">
+                      {errors.email}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-phone" className="form-label">
+                    Phone Number <span className="optional-tag">(optional)</span>
+                  </label>
+                  <input
+                    id="contact-phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone number (optional)"
+                    className="form-input"
+                    disabled={isSubmitting}
+                    data-testid="input-contact-phone"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact-message" className="form-label">
+                    Message <span className="required-star">*</span>
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Tell us how we can help..."
+                    className={`form-textarea ${errors.message ? 'has-error' : ''}`}
+                    aria-invalid={!!errors.message}
+                    aria-describedby={errors.message ? 'message-error' : undefined}
+                    disabled={isSubmitting}
+                    data-testid="input-contact-message"
+                  />
+                  {errors.message && (
+                    <span id="message-error" className="form-error-msg" data-testid="error-contact-message">
+                      {errors.message}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="contact-submit-btn magnetic"
+                  disabled={isSubmitting}
+                  data-cursor-label="SUBMIT"
+                  data-testid="button-contact-submit"
+                >
+                  <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                  <ArrowRight size={14} />
+                </button>
+              </form>
+            )}
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
-  const footerLinks = [{ label: 'Network', href: '#network' }, { label: 'Builds', href: '#builds' }, { label: 'Programs', href: '#programs' }, { label: 'Team', href: '#team' }, { label: 'Chapters', href: externalLinks.chapter }, { label: 'Join', href: externalLinks.join }];
+  const footerLinks = [{ label: 'Network', href: '#network' }, { label: 'Builds', href: '#builds' }, { label: 'Programs', href: '#programs' }, { label: 'Team', href: '#team' }, { label: 'Chapters', href: externalLinks.chapter }, { label: 'Contact', href: '#contact' }, { label: 'Join', href: externalLinks.join }];
   return (
     <footer className="footer">
       <div className="container-wide">
@@ -567,13 +831,6 @@ function Home() {
 
     const cleanupFns: Array<() => void> = [];
     const context = gsap.context(() => {
-      const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      intro
-        .from('.hero-eyebrow', { opacity: 0, y: 18, filter: 'blur(8px)', duration: 0.8 })
-        .from('.hero h1', { opacity: 0, y: 52, duration: 1.05 }, '-=0.46')
-        .from(['.hero-description', '.hero-role', '.hero-actions'], { opacity: 0, y: 22, stagger: 0.08, duration: 0.65 }, '-=0.5')
-        .from('.status-strip', { opacity: 0, y: 18, duration: 0.7 }, '-=0.25');
-
       gsap.to('.hero-orbit', {
         rotation: 12,
         scale: 1.04,
@@ -581,20 +838,6 @@ function Home() {
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
-      });
-
-      gsap.utils.toArray<HTMLElement>('.section-intro, .terminal-wrap, .why-item, .join-section .container-wide').forEach((element) => {
-        gsap.fromTo(element,
-          { opacity: 0, y: 34, filter: 'blur(8px)' },
-          {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 0.9,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: element, start: 'top 84%', once: true },
-          },
-        );
       });
 
       gsap.utils.toArray<HTMLElement>('.magnetic').forEach((element) => {
@@ -627,6 +870,7 @@ function Home() {
 
   return (
     <div ref={shellRef} className="site-shell noise">
+      <ParticlesBackground />
       <InteractionLayer />
       <LoadingScreen />
       <Navbar />
@@ -647,6 +891,7 @@ function Home() {
         <JoinTeam />
         <div className="marquee-wrap" aria-label="Build, ship, learn, connect, lead"><div className="marquee">{Array.from({ length: 2 }, (_, group) => <span key={group}>BUILD <b>•</b> SHIP <b>•</b> LEARN <b>•</b> CONNECT <b>•</b> LEAD <b>•</b>&nbsp;</span>)}</div></div>
         <Join />
+        <ContactSection />
       </main>
       <Footer />
     </div>
