@@ -1,0 +1,91 @@
+export const externalLinks = {
+  // Replace these clearly marked placeholders when the network destinations are ready.
+  join: 'https://example.com/init-join',
+  chapter: 'https://example.com/init-chapter',
+  discord: 'https://example.com/init-discord',
+  github: 'https://github.com',
+  linkedin: 'https://www.linkedin.com',
+  instagram: 'https://www.instagram.com',
+  x: 'https://x.com',
+} as const;
+
+export const initData = {
+  roles: ['developers', 'founders', 'designers', 'hackers', 'builders'],
+  status: ['50+ builders', '12+ campuses', '∞ ideas'],
+  networkNodes: [
+    { id: 'developers', label: 'Developers', x: '18%', y: '25%', detail: 'From first commit to systems that scale.' },
+    { id: 'ai-ml', label: 'AI / ML', x: '74%', y: '18%', detail: 'Research-minded builders turning models into tools.' },
+    { id: 'designers', label: 'Designers', x: '84%', y: '52%', detail: 'Interface thinkers shaping what people reach for.' },
+    { id: 'founders', label: 'Founders', x: '67%', y: '77%', detail: 'Small teams, clear bets, shipping in public.' },
+    { id: 'open-source', label: 'Open source', x: '26%', y: '78%', detail: 'Contributors who make the commons stronger.' },
+    { id: 'security', label: 'Security', x: '13%', y: '56%', detail: 'Curious minds testing the edge of the system.' },
+    { id: 'robotics', label: 'Robotics', x: '51%', y: '13%', detail: 'Hardware, control loops, and physical futures.' },
+    { id: 'creators', label: 'Creators', x: '48%', y: '89%', detail: 'Story, motion, and experiments that pull people in.' },
+  ],
+  projects: [
+    { title: 'AI Research Lab', description: 'A small, open room for practical experiments with models, agents, and data.', status: 'BUILDING', tags: ['AI', 'RESEARCH'], visual: 'visual-orbit', contributors: '08 CONTRIBUTORS' },
+    { title: 'CampusOS', description: 'The operating layer for a more connected student builder ecosystem.', status: 'OPEN', tags: ['PRODUCT', 'SYSTEMS'], visual: 'visual-grid', contributors: '12 CONTRIBUTORS' },
+    { title: 'Open Source Sprint', description: 'A focused week of meaningful pull requests, good issues, and shared momentum.', status: 'SHIPPED', tags: ['OPEN SOURCE', 'GIT'], visual: 'visual-terminal', contributors: '17 CONTRIBUTORS' },
+    { title: 'Build Week / 04', description: 'Five days. One constraint: put the work in the world.', status: 'OPEN', tags: ['BUILD WEEK', 'WEB'], visual: 'visual-signal', contributors: '24 CONTRIBUTORS' },
+    { title: 'Signal Garden', description: 'A playful exploration of attention, ambient data, and generous software.', status: 'BUILDING', tags: ['CREATIVE TECH', 'DATA'], visual: 'visual-blueprint', contributors: '06 CONTRIBUTORS' },
+    { title: 'Launch Relay', description: 'Student startups trading notes, feedback, and the hard parts of going live.', status: 'OPEN', tags: ['FOUNDERS', 'PRODUCT'], visual: 'visual-node', contributors: '10 CONTRIBUTORS' },
+  ],
+  programs: [
+    { number: '01', title: 'INIT Chapters', description: 'Build INIT on your campus.', detail: 'A local room for ambitious people to meet, make, and make the next introduction.' },
+    { number: '02', title: 'INIT Labs', description: 'Deep technical learning through projects.', detail: 'Small cohorts, sharp prompts, and artifacts you can point to when the work is done.' },
+    { number: '03', title: 'INIT Build Weeks', description: 'Ship something in public.', detail: 'A shared deadline that turns “someday” into a live URL, demo, or pull request.' },
+    { number: '04', title: 'INIT Open Source', description: 'Contribute to projects that matter.', detail: 'Find a useful issue, work with generous maintainers, and leave the codebase better.' },
+  ],
+  chapters: [
+    { city: 'Bengaluru', code: 'BLR / 001', detail: 'A first room for product thinkers, engineers, and curious beginners.' },
+    { city: 'Delhi NCR', code: 'DEL / 002', detail: 'Builders connecting ideas across campuses and disciplines.' },
+    { city: 'Mumbai', code: 'BOM / 003', detail: 'A fast-moving chapter for shipping in public.' },
+    { city: 'Your campus', code: 'YOU / NEXT', detail: 'The next chapter can start with a small group and a good question.' },
+  ],
+  team: [
+    { name: 'The builders', role: 'COMMUNITY', detail: 'Students turning questions into prototypes, pull requests, and useful rooms.' },
+    { name: 'The operators', role: 'CHAPTERS', detail: 'People creating the conditions for more people to build together.' },
+    { name: 'The mentors', role: 'INDUSTRY', detail: 'Practitioners who share context, feedback, and the hard-won shortcuts.' },
+  ],
+  events: [
+    { date: 'APR 18', title: 'Build Night / 04', type: 'IN-PERSON', detail: 'An evening to move one unfinished idea forward.' },
+    { date: 'MAY 02', title: 'Open Source Office Hours', type: 'ONLINE', detail: 'Bring an issue, a question, or your first contribution.' },
+    { date: 'MAY 23', title: 'INIT Demo Day', type: 'SHOWCASE', detail: 'A room full of live work, honest feedback, and new collaborators.' },
+  ],
+  partners: ['GitHub', 'Vercel', 'Figma', 'AWS', 'Notion', 'Your team'],
+  positions: [
+    { title: 'Chapter Lead', type: 'PART-TIME / CAMPUS', detail: 'Create a local room where builders can meet and ship.' },
+    { title: 'Community Operator', type: 'REMOTE / FLEXIBLE', detail: 'Help the network turn good energy into repeatable momentum.' },
+    { title: 'Mentor in Residence', type: 'VOLUNTEER / INDUSTRY', detail: 'Give practical feedback to the next generation of builders.' },
+  ],
+  stats: [
+    { value: '50+', label: 'Builders' },
+    { value: '12+', label: 'Campuses' },
+    { value: '100+', label: 'Projects' },
+    { value: '∞', label: 'Possibilities' },
+  ],
+  why: [
+    { title: 'Learn', text: 'Learn by building, not by collecting tabs.' },
+    { title: 'Ship', text: 'Turn good ideas into working products.' },
+    { title: 'Connect', text: 'Meet people who build like you.' },
+    { title: 'Lead', text: 'Create communities and opportunities.' },
+  ],
+  explorations: [
+    { title: 'A new interface for curiosity', description: 'An experiment in making the unknown feel navigable.' },
+    { title: 'Distributed by default', description: 'Notes on building systems that leave room for people.' },
+    { title: 'Signal / noise', description: 'A visual study of what gets through.' },
+    { title: 'The physical web', description: 'Small gestures, real rooms, shared surfaces.' },
+    { title: 'An unfinished map', description: 'Every useful network starts with a few points.' },
+    { title: 'Build in public', description: 'The artifact is the invitation.' },
+  ],
+  socials: [
+    { label: 'GitHub', href: externalLinks.github },
+    { label: 'LinkedIn', href: externalLinks.linkedin },
+    { label: 'Instagram', href: externalLinks.instagram },
+    { label: 'Discord', href: externalLinks.discord },
+    { label: 'X', href: externalLinks.x },
+  ],
+} as const;
+
+export type NetworkNode = (typeof initData.networkNodes)[number];
+export type Exploration = (typeof initData.explorations)[number];
