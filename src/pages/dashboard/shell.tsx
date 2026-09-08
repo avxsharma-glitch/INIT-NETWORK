@@ -11,11 +11,13 @@ import {
   UserCircle,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  MessageSquareShare,
 } from "lucide-react";
 
 const navItems = [
   { title: "Home", url: "/app", icon: LayoutDashboard, exact: true },
+  { title: "Community", url: "/app/community", icon: MessageSquareShare },
   { title: "Discover", url: "/app/discover", icon: Compass },
   { title: "Builders", url: "/app/builders", icon: Users },
   { title: "Projects", url: "/app/projects", icon: FolderOpen },

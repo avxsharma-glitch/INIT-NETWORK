@@ -678,6 +678,7 @@ import { ProjectsPage, ProjectDetailPage } from "@/pages/dashboard/projects";
 import { TeamsPage, TeamDetailPage } from "@/pages/dashboard/teams";
 import { ShowcasePage } from "@/pages/dashboard/showcase";
 import { ProfilePage } from "@/pages/dashboard/profile";
+import { CommunityPage } from "@/pages/community";
 
 function Router() {
   return (
@@ -689,6 +690,8 @@ function Router() {
           <DashboardShell>
             <Switch>
               <Route path="/app" component={DashboardOverview} />
+              <Route path="/app/community/:tab?" component={CommunityPage} />
+              <Route path="/app/community" component={CommunityPage} />
               <Route path="/app/discover" component={DiscoverPage} />
               <Route path="/app/builders/:id" component={BuilderDetailPage} />
               <Route path="/app/builders" component={BuildersPage} />
