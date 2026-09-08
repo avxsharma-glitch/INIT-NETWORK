@@ -6,6 +6,9 @@ import {
 } from "@/data/mock";
 import { useAppStore } from "@/store/AppStore";
 import { GitBranch, X as XIcon, Globe, Pencil, Check } from "lucide-react";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 const SKILL_LEVEL_COLORS = {
   LEARNING: "#555",
@@ -35,7 +38,7 @@ export function ProfilePage() {
   );
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       {/* Profile Header */}
       <div className="p-6 rounded-2xl bg-[#141414] border border-[#1F1F1F] relative">
         <button className="absolute top-5 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1F1F1F] text-xs text-[#555] hover:text-[#F5F5F5] hover:border-[#2A2A2A] transition-colors">
@@ -85,51 +88,55 @@ export function ProfilePage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <StaggerList className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Projects", value: projects.length },
           { label: "Contributions", value: contributions.length },
           { label: "Connections", value: connectionCount },
           { label: "Member Since", value: currentUser.joinedAt },
         ].map((s) => (
-          <div key={s.label} className="px-4 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F]">
-            <p className="text-xl font-semibold">{s.value}</p>
-            <p className="text-[9px] font-mono text-[#555] mt-1 tracking-wider">
-              {String(s.label).toUpperCase()}
-            </p>
-          </div>
+          <StaggerItem key={s.label}>
+            <TiltCard className="px-4 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F]">
+              <p className="text-xl font-semibold">{s.value}</p>
+              <p className="text-[9px] font-mono text-[#555] mt-1 tracking-wider">
+                {String(s.label).toUpperCase()}
+              </p>
+            </TiltCard>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerList>
 
       {/* Applications */}
       {state.applications.length > 0 && (
         <section>
           <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">APPLICATIONS</h2>
-          <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+          <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
             {state.applications.map((app: any, i: number) => {
               const team = state.teams.find((t: any) => t.id === app.teamId);
               return (
-                <div key={app.id} className={`px-4 py-3 flex items-center justify-between ${i < state.applications.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
-                  <div>
-                    <p className="text-sm font-medium text-[#ccc]">{app.role}</p>
-                    <p className="text-xs text-[#555] mt-0.5">{team?.name || "Unknown team"}</p>
+                <StaggerItem key={app.id}>
+                  <div className={`px-4 py-3 flex items-center justify-between ${i < state.applications.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                    <div>
+                      <p className="text-sm font-medium text-[#ccc]">{app.role}</p>
+                      <p className="text-xs text-[#555] mt-0.5">{team?.name || "Unknown team"}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-mono text-[#444]">{app.appliedAt}</span>
+                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
+                        app.status === "PENDING"
+                          ? "text-[#C9A830] border-[#C9A830]/30 bg-[#C9A830]/5"
+                          : app.status === "APPROVED"
+                          ? "text-[#3ACA7A] border-[#3ACA7A]/30 bg-[#3ACA7A]/5"
+                          : "text-[#888] border-[#888]/30 bg-[#888]/5"
+                      }`}>
+                        {app.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-mono text-[#444]">{app.appliedAt}</span>
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
-                      app.status === "PENDING"
-                        ? "text-[#C9A830] border-[#C9A830]/30 bg-[#C9A830]/5"
-                        : app.status === "APPROVED"
-                        ? "text-[#3ACA7A] border-[#3ACA7A]/30 bg-[#3ACA7A]/5"
-                        : "text-[#888] border-[#888]/30 bg-[#888]/5"
-                    }`}>
-                      {app.status}
-                    </span>
-                  </div>
-                </div>
+                </StaggerItem>
               );
             })}
-          </div>
+          </StaggerList>
         </section>
       )}
 
@@ -140,28 +147,30 @@ export function ProfilePage() {
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">PROJECTS</h2>
             {projects.length > 0 ? (
-              <div className="space-y-3">
+              <StaggerList className="space-y-3">
                 {projects.map((project: any) => {
                   const color = statusTextColors[project.status] || "#999";
                   return (
-                    <div key={project.id} className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] flex items-center justify-between gap-4">
-                      <div className="min-w-0">
-                        <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
-                          style={{ color, borderColor: `${color}40`, background: `${color}10` }}>
-                          {project.status}
-                        </span>
-                        <p className="text-sm font-medium mt-2">{project.title}</p>
-                        <p className="text-xs text-[#555] mt-0.5">{project.tagline}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-1 shrink-0">
-                        {project.techStack.slice(0, 2).map((t: string) => (
-                          <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
-                        ))}
-                      </div>
-                    </div>
+                    <StaggerItem key={project.id}>
+                      <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
+                            style={{ color, borderColor: `${color}40`, background: `${color}10` }}>
+                            {project.status}
+                          </span>
+                          <p className="text-sm font-medium mt-2">{project.title}</p>
+                          <p className="text-xs text-[#555] mt-0.5">{project.tagline}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-1 shrink-0">
+                          {project.techStack.slice(0, 2).map((t: string) => (
+                            <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
+                          ))}
+                        </div>
+                      </TiltCard>
+                    </StaggerItem>
                   );
                 })}
-              </div>
+              </StaggerList>
             ) : (
               <p className="text-sm text-[#444]">No projects yet.</p>
             )}
@@ -171,21 +180,23 @@ export function ProfilePage() {
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">CONTRIBUTIONS</h2>
             {contributions.length > 0 ? (
-              <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+              <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
                 {contributions.map((c: any, i: number) => {
                   const project = getProjectById(c.projectId);
                   return (
-                    <div key={c.id} className={`p-4 ${i < contributions.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{c.type}</span>
-                        <span className="text-[9px] font-mono text-[#444]">{c.date}</span>
+                    <StaggerItem key={c.id}>
+                      <div className={`p-4 ${i < contributions.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{c.type}</span>
+                          <span className="text-[9px] font-mono text-[#444]">{c.date}</span>
+                        </div>
+                        <p className="text-sm font-medium text-[#ccc]">{c.title}</p>
+                        <p className="text-xs text-[#555] mt-0.5">{project?.title}</p>
                       </div>
-                      <p className="text-sm font-medium text-[#ccc]">{c.title}</p>
-                      <p className="text-xs text-[#555] mt-0.5">{project?.title}</p>
-                    </div>
+                    </StaggerItem>
                   );
                 })}
-              </div>
+              </StaggerList>
             ) : (
               <p className="text-sm text-[#444]">No contributions yet.</p>
             )}
@@ -197,41 +208,45 @@ export function ProfilePage() {
           {/* Skills */}
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">SKILLS</h2>
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+            <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
               {sortedSkills.map((skill, i) => {
                 const color = SKILL_LEVEL_COLORS[skill.level];
                 return (
-                  <div key={skill.name} className={`px-4 py-3 flex items-center justify-between ${i < sortedSkills.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
-                    <span className="text-sm text-[#ccc]">{skill.name}</span>
-                    <span className="text-[9px] font-mono" style={{ color }}>{skill.level}</span>
-                  </div>
+                  <StaggerItem key={skill.name}>
+                    <div className={`px-4 py-3 flex items-center justify-between ${i < sortedSkills.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                      <span className="text-sm text-[#ccc]">{skill.name}</span>
+                      <span className="text-[9px] font-mono" style={{ color }}>{skill.level}</span>
+                    </div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerList>
           </section>
 
           {/* Achievements */}
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">ACHIEVEMENTS</h2>
             {achievements.length > 0 ? (
-              <div className="space-y-2">
+              <StaggerList className="space-y-2">
                 {achievements.map((ach) => (
-                  <div key={ach.id} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F]">
-                    <span className="text-xl shrink-0">{ach.icon}</span>
-                    <div>
-                      <p className="text-xs font-medium text-[#ccc]">{ach.title}</p>
-                      <p className="text-[10px] text-[#555] mt-0.5">{ach.description}</p>
-                      <p className="text-[9px] font-mono text-[#444] mt-1">{ach.earnedAt}</p>
-                    </div>
-                  </div>
+                  <StaggerItem key={ach.id}>
+                    <TiltCard className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F]">
+                      <span className="text-xl shrink-0">{ach.icon}</span>
+                      <div>
+                        <p className="text-xs font-medium text-[#ccc]">{ach.title}</p>
+                        <p className="text-[10px] text-[#555] mt-0.5">{ach.description}</p>
+                        <p className="text-[9px] font-mono text-[#444] mt-1">{ach.earnedAt}</p>
+                      </div>
+                    </TiltCard>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerList>
             ) : (
               <p className="text-sm text-[#444]">No achievements yet.</p>
             )}
           </section>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

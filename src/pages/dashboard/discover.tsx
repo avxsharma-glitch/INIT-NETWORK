@@ -3,6 +3,9 @@ import { mockBuilders, type Builder, type Project, type Team, statusTextColors }
 import { useAppStore } from "@/store/AppStore";
 import { Link } from "wouter";
 import { Search, Users, FolderOpen, UserPlus, ArrowRight, UserCheck } from "lucide-react";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 type Tab = "builders" | "projects" | "teams";
 
@@ -11,7 +14,7 @@ function BuilderCard({ builder }: { builder: Builder }) {
   const connected = isConnected(builder.id);
   return (
     <Link href={`/app/builders/${builder.id}`}>
-      <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+      <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full">
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">
             <img src={builder.avatar} alt={builder.name}
@@ -43,7 +46,7 @@ function BuilderCard({ builder }: { builder: Builder }) {
           </span>
           <ArrowRight className="h-3.5 w-3.5 text-[#333] group-hover:text-[#89AACC] transition-colors" />
         </div>
-      </div>
+      </TiltCard>
     </Link>
   );
 }
@@ -57,7 +60,7 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <Link href={`/app/projects/${project.id}`}>
-      <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+      <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
             style={{ color, borderColor: `${color}40`, background: `${color}10` }}>
@@ -79,7 +82,7 @@ function ProjectCard({ project }: { project: Project }) {
         <p className="text-[9px] font-mono text-[#444] mt-3">
           {project.members.length} MEMBER{project.members.length !== 1 ? "S" : ""}
         </p>
-      </div>
+      </TiltCard>
     </Link>
   );
 }
@@ -91,7 +94,7 @@ function TeamCard({ team }: { team: Team }) {
 
   return (
     <Link href={`/app/teams/${team.id}`}>
-      <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+      <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{team.name}</h3>
           {anyApplied && <span className="text-[8px] font-mono text-[#89AACC] shrink-0">APPLIED</span>}
@@ -117,7 +120,7 @@ function TeamCard({ team }: { team: Team }) {
         <p className="text-[9px] font-mono text-[#444] mt-3">
           {team.memberIds.length} MEMBER{team.memberIds.length !== 1 ? "S" : ""}
         </p>
-      </div>
+      </TiltCard>
     </Link>
   );
 }
@@ -162,7 +165,7 @@ export function DiscoverPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Discover</h1>
         <p className="text-sm text-[#555] mt-1">
@@ -196,27 +199,39 @@ export function DiscoverPage() {
       {/* Results */}
       <div>
         {tab === "builders" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredBuilders.length > 0
-              ? filteredBuilders.map((b) => <BuilderCard key={b.id} builder={b} />)
+              ? filteredBuilders.map((b) => (
+                  <StaggerItem key={b.id}>
+                    <BuilderCard builder={b} />
+                  </StaggerItem>
+                ))
               : <p className="col-span-3 text-sm text-[#444] text-center py-12">No builders found.</p>}
-          </div>
+          </StaggerList>
         )}
         {tab === "projects" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProjects.length > 0
-              ? filteredProjects.map((p: Project) => <ProjectCard key={p.id} project={p} />)
+              ? filteredProjects.map((p: Project) => (
+                  <StaggerItem key={p.id}>
+                    <ProjectCard project={p} />
+                  </StaggerItem>
+                ))
               : <p className="col-span-3 text-sm text-[#444] text-center py-12">No projects found.</p>}
-          </div>
+          </StaggerList>
         )}
         {tab === "teams" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTeams.length > 0
-              ? filteredTeams.map((t: Team) => <TeamCard key={t.id} team={t} />)
+              ? filteredTeams.map((t: Team) => (
+                  <StaggerItem key={t.id}>
+                    <TeamCard team={t} />
+                  </StaggerItem>
+                ))
               : <p className="col-span-3 text-sm text-[#444] text-center py-12">No teams found.</p>}
-          </div>
+          </StaggerList>
         )}
       </div>
-    </div>
+    </PageTransition>
   );
 }

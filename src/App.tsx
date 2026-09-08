@@ -684,19 +684,20 @@ function Router() {
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/app" nested>
+        {/* All /app/* routes rendered inside the DashboardShell */}
+        <Route path="/app/:rest*">
           <DashboardShell>
             <Switch>
-              <Route path="/" component={DashboardOverview} />
-              <Route path="/discover" component={DiscoverPage} />
-              <Route path="/builders/:id" component={BuilderDetailPage} />
-              <Route path="/builders" component={BuildersPage} />
-              <Route path="/projects/:id" component={ProjectDetailPage} />
-              <Route path="/projects" component={ProjectsPage} />
-              <Route path="/teams/:id" component={TeamDetailPage} />
-              <Route path="/teams" component={TeamsPage} />
-              <Route path="/showcase" component={ShowcasePage} />
-              <Route path="/profile" component={ProfilePage} />
+              <Route path="/app" component={DashboardOverview} />
+              <Route path="/app/discover" component={DiscoverPage} />
+              <Route path="/app/builders/:id" component={BuilderDetailPage} />
+              <Route path="/app/builders" component={BuildersPage} />
+              <Route path="/app/projects/:id" component={ProjectDetailPage} />
+              <Route path="/app/projects" component={ProjectsPage} />
+              <Route path="/app/teams/:id" component={TeamDetailPage} />
+              <Route path="/app/teams" component={TeamsPage} />
+              <Route path="/app/showcase" component={ShowcasePage} />
+              <Route path="/app/profile" component={ProfilePage} />
               <Route>
                 <div className="flex h-[50vh] items-center justify-center text-[#878787] font-mono text-sm">
                   PAGE NOT FOUND
@@ -705,11 +706,18 @@ function Router() {
             </Switch>
           </DashboardShell>
         </Route>
+        {/* Exact /app with no trailing segment */}
+        <Route path="/app">
+          <DashboardShell>
+            <DashboardOverview />
+          </DashboardShell>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
   );
 }
+
 
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {

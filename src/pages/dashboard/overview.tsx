@@ -10,6 +10,9 @@ import {
 } from "@/data/mock";
 import { ArrowRight, Plus, Zap, Clock } from "lucide-react";
 import { Link } from "wouter";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 function StatusBadge({ status }: { status: string }) {
   const color = statusTextColors[status as keyof typeof statusTextColors] || "#999";
@@ -35,7 +38,7 @@ export function DashboardOverview() {
     .slice(0, 4);
 
   return (
-    <div className="space-y-10">
+    <PageTransition className="space-y-10">
       {/* Identity Header */}
       <section className="flex items-start justify-between gap-6 flex-wrap">
         <div className="flex items-center gap-4">
@@ -75,24 +78,23 @@ export function DashboardOverview() {
       </section>
 
       {/* Quick Stats */}
-      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <StaggerList className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Active Builds", value: myProjects.length },
           { label: "Contributions", value: myContributions.length },
           { label: "Connections", value: 12 },
           { label: "Achievements", value: currentUser.achievementIds.length }
         ].map((stat) => (
-          <div
-            key={stat.label}
-            className="px-5 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F]"
-          >
-            <p className="text-2xl font-semibold">{stat.value}</p>
-            <p className="text-[10px] font-mono text-[#555] mt-1 tracking-wider">
-              {stat.label.toUpperCase()}
-            </p>
-          </div>
+          <StaggerItem key={stat.label}>
+            <div className="px-5 py-4 rounded-xl bg-[#141414] border border-[#1F1F1F] h-full">
+              <p className="text-2xl font-semibold">{stat.value}</p>
+              <p className="text-[10px] font-mono text-[#555] mt-1 tracking-wider">
+                {stat.label.toUpperCase()}
+              </p>
+            </div>
+          </StaggerItem>
         ))}
-      </section>
+      </StaggerList>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Projects + Builders */}
@@ -111,10 +113,11 @@ export function DashboardOverview() {
                 ALL PROJECTS <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
-            <div className="space-y-3">
+            <StaggerList className="space-y-3">
               {myProjects.map((project) => (
-                <Link key={project.id} href={`/app/projects/${project.id}`}>
-                  <div className="p-5 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+                <StaggerItem key={project.id}>
+                  <Link href={`/app/projects/${project.id}`}>
+                    <TiltCard className="p-5 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-2">
@@ -151,10 +154,11 @@ export function DashboardOverview() {
                         </span>
                       ))}
                     </div>
-                  </div>
-                </Link>
+                    </TiltCard>
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerList>
           </section>
 
           {/* Suggested Builders */}
@@ -170,10 +174,11 @@ export function DashboardOverview() {
                 ALL BUILDERS <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <StaggerList className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {suggestedBuilders.map((builder) => (
-                <Link key={builder.id} href={`/app/builders/${builder.id}`}>
-                  <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
+                <StaggerItem key={builder.id}>
+                  <Link href={`/app/builders/${builder.id}`}>
+                    <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center h-full">
                     <img
                       src={builder.avatar}
                       alt={builder.name}
@@ -196,10 +201,11 @@ export function DashboardOverview() {
                         </span>
                       ))}
                     </div>
-                  </div>
-                </Link>
+                    </TiltCard>
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerList>
           </section>
         </div>
 
@@ -210,15 +216,15 @@ export function DashboardOverview() {
             <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
               NETWORK ACTIVITY
             </h2>
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+            <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
               {recentNetwork.map((c, i) => {
                 const builder = getBuilderById(c.builderId);
                 const project = getProjectById(c.projectId);
                 return (
-                  <div
-                    key={c.id}
-                    className={`p-4 flex gap-3 ${i < recentNetwork.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}
-                  >
+                  <StaggerItem key={c.id}>
+                    <div
+                      className={`p-4 flex gap-3 ${i < recentNetwork.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}
+                    >
                     {builder && (
                       <img
                         src={builder.avatar}
@@ -236,10 +242,11 @@ export function DashboardOverview() {
                         {c.type} · {c.date}
                       </p>
                     </div>
-                  </div>
+                    </div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerList>
           </section>
 
           {/* Quick Actions */}
@@ -247,23 +254,25 @@ export function DashboardOverview() {
             <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
               QUICK ACTIONS
             </h2>
-            <div className="space-y-2">
+            <StaggerList className="space-y-2">
               {[
                 { label: "Start a new project", href: "/app/projects", icon: Zap },
                 { label: "Find collaborators", href: "/app/discover", icon: Plus },
                 { label: "Browse showcase", href: "/app/showcase", icon: ArrowRight }
               ].map((action) => (
-                <Link key={action.label} href={action.href}>
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#1F1F1F] bg-[#141414] hover:border-[#89AACC]/30 cursor-pointer group transition-colors">
-                    <action.icon className="h-4 w-4 text-[#555] group-hover:text-[#89AACC] transition-colors" />
-                    <span className="text-sm text-[#878787] group-hover:text-[#F5F5F5] transition-colors">
-                      {action.label}
-                    </span>
-                    <ChevronRight className="h-3.5 w-3.5 text-[#333] ml-auto group-hover:text-[#555] transition-colors" />
-                  </div>
-                </Link>
+                <StaggerItem key={action.label}>
+                  <Link href={action.href}>
+                    <TiltCard className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#1F1F1F] bg-[#141414] hover:border-[#89AACC]/30 cursor-pointer group transition-colors">
+                      <action.icon className="h-4 w-4 text-[#555] group-hover:text-[#89AACC] transition-colors" />
+                      <span className="text-sm text-[#878787] group-hover:text-[#F5F5F5] transition-colors">
+                        {action.label}
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-[#333] ml-auto group-hover:text-[#555] transition-colors" />
+                    </TiltCard>
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerList>
           </section>
 
           {/* My Contributions */}
@@ -271,14 +280,14 @@ export function DashboardOverview() {
             <h2 className="text-sm font-mono tracking-widest text-[#878787] mb-5">
               MY RECENT CONTRIBUTIONS
             </h2>
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+            <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
               {myContributions.slice(0, 3).map((c, i) => {
                 const project = getProjectById(c.projectId);
                 return (
-                  <div
-                    key={c.id}
-                    className={`p-4 ${i < 2 ? "border-b border-[#1F1F1F]" : ""}`}
-                  >
+                  <StaggerItem key={c.id}>
+                    <div
+                      className={`p-4 ${i < 2 ? "border-b border-[#1F1F1F]" : ""}`}
+                    >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">
                         {c.type}
@@ -294,14 +303,15 @@ export function DashboardOverview() {
                     <p className="text-[9px] text-[#555] mt-0.5">
                       {project?.title}
                     </p>
-                  </div>
+                    </div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerList>
           </section>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

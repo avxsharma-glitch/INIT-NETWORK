@@ -10,6 +10,9 @@ import {
 import { useAppStore } from "@/store/AppStore";
 import { Link, useParams } from "wouter";
 import { ArrowLeft, ExternalLink, GitBranch, X as XIcon, Globe, UserPlus, UserCheck } from "lucide-react";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 const SKILL_LEVEL_COLORS = {
   LEARNING: "#555",
@@ -25,11 +28,10 @@ function ConnectButton({ builder }: { builder: Builder }) {
   return (
     <button
       onClick={() => connected ? disconnectBuilder(builder.id) : connectBuilder(builder.id)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-medium transition-all ${
-        connected
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-medium transition-all ${connected
           ? "border-[#3ACA7A]/30 bg-[#3ACA7A]/5 text-[#3ACA7A] hover:border-red-500/30 hover:bg-red-500/5 hover:text-red-400"
           : "border-[#89AACC]/30 bg-[#89AACC]/5 text-[#89AACC] hover:border-[#89AACC] hover:bg-[#89AACC]/10"
-      }`}
+        }`}
     >
       {connected ? (
         <><UserCheck className="h-3.5 w-3.5" /> Connected</>
@@ -50,7 +52,7 @@ function BuilderProfile({ builder }: { builder: Builder }) {
   const isCurrentUser = builder.id === currentUser.id;
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       <Link href="/app/builders" className="flex items-center gap-2 text-xs font-mono text-[#555] hover:text-[#878787] transition-colors w-fit">
         <ArrowLeft className="h-3.5 w-3.5" /> ALL BUILDERS
       </Link>
@@ -135,18 +137,20 @@ function BuilderProfile({ builder }: { builder: Builder }) {
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">CONTRIBUTIONS</h2>
             {contributions.length > 0 ? (
-              <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+              <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
                 {contributions.map((c, i) => (
-                  <div key={c.id} className={`p-4 ${i < contributions.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{c.type}</span>
-                      <span className="text-[9px] font-mono text-[#444]">{c.date}</span>
+                  <StaggerItem key={c.id}>
+                    <div className={`p-4 ${i < contributions.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[8px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{c.type}</span>
+                        <span className="text-[9px] font-mono text-[#444]">{c.date}</span>
+                      </div>
+                      <p className="text-sm font-medium text-[#ccc]">{c.title}</p>
+                      <p className="text-xs text-[#555] mt-0.5 line-clamp-2">{c.description}</p>
                     </div>
-                    <p className="text-sm font-medium text-[#ccc]">{c.title}</p>
-                    <p className="text-xs text-[#555] mt-0.5 line-clamp-2">{c.description}</p>
-                  </div>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerList>
             ) : (
               <p className="text-sm text-[#444]">No contributions yet.</p>
             )}
@@ -157,35 +161,39 @@ function BuilderProfile({ builder }: { builder: Builder }) {
           {/* Skills */}
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">SKILLS</h2>
-            <div className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
+            <StaggerList className="bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-hidden">
               {builder.skills.map((skill, i) => {
                 const color = SKILL_LEVEL_COLORS[skill.level];
                 return (
-                  <div key={skill.name} className={`px-4 py-3 flex items-center justify-between ${i < builder.skills.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
-                    <span className="text-sm text-[#ccc]">{skill.name}</span>
-                    <span className="text-[9px] font-mono" style={{ color }}>{skill.level}</span>
-                  </div>
+                  <StaggerItem key={skill.name}>
+                    <div className={`px-4 py-3 flex items-center justify-between ${i < builder.skills.length - 1 ? "border-b border-[#1F1F1F]" : ""}`}>
+                      <span className="text-sm text-[#ccc]">{skill.name}</span>
+                      <span className="text-[9px] font-mono" style={{ color }}>{skill.level}</span>
+                    </div>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </StaggerList>
           </section>
 
           {/* Achievements */}
           {builder.achievementIds.length > 0 && (
             <section>
               <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">ACHIEVEMENTS</h2>
-              <div className="space-y-2">
+              <StaggerList className="space-y-2">
                 {builder.achievementIds.map((aid) => {
                   const icons: Record<string, string> = { ach1: "🚀", ach2: "🔗", ach3: "🏛️", ach4: "🌐", ach5: "🏆", ach6: "🎓", ach7: "💡", ach8: "⚡" };
                   const labels: Record<string, string> = { ach1: "First Ship", ach2: "Connector", ach3: "Chapter Founder", ach4: "Open Source", ach5: "Hackathon Winner", ach6: "Mentor", ach7: "Idea Machine", ach8: "Shipped to Production" };
                   return (
-                    <div key={aid} className="px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F] flex items-center gap-3">
-                      <span className="text-lg shrink-0">{icons[aid] || "⭐"}</span>
-                      <p className="text-xs font-medium text-[#ccc]">{labels[aid] || aid}</p>
-                    </div>
+                    <StaggerItem key={aid}>
+                      <TiltCard className="px-4 py-3 rounded-xl bg-[#141414] border border-[#1F1F1F] flex items-center gap-3">
+                        <span className="text-lg shrink-0">{icons[aid] || "⭐"}</span>
+                        <p className="text-xs font-medium text-[#ccc]">{labels[aid] || aid}</p>
+                      </TiltCard>
+                    </StaggerItem>
                   );
                 })}
-              </div>
+              </StaggerList>
             </section>
           )}
 
@@ -207,7 +215,7 @@ function BuilderProfile({ builder }: { builder: Builder }) {
           </section>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 
@@ -227,7 +235,7 @@ export function BuildersPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Builders</h1>
         <p className="text-sm text-[#555] mt-1">
@@ -248,21 +256,21 @@ export function BuildersPage() {
         <div className="flex gap-1 p-1 bg-[#141414] border border-[#1F1F1F] rounded-xl overflow-x-auto">
           {roles.map((r) => (
             <button key={r} onClick={() => setRoleFilter(r)}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-mono whitespace-nowrap transition-colors ${
-                roleFilter === r ? "bg-[#0A0A0A] text-[#F5F5F5] border border-[#2A2A2A]" : "text-[#555] hover:text-[#878787]"
-              }`}>
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-mono whitespace-nowrap transition-colors ${roleFilter === r ? "bg-[#0A0A0A] text-[#F5F5F5] border border-[#2A2A2A]" : "text-[#555] hover:text-[#878787]"
+                }`}>
               {r}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((builder) => {
           const connected = isConnected(builder.id);
           return (
-            <Link key={builder.id} href={`/app/builders/${builder.id}`}>
-              <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full">
+            <StaggerItem key={builder.id}>
+              <Link href={`/app/builders/${builder.id}`}>
+                <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="relative shrink-0">
                     <img src={builder.avatar} alt={builder.name}
@@ -283,15 +291,16 @@ export function BuildersPage() {
                     <span key={s.name} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{s.name}</span>
                   ))}
                 </div>
-              </div>
-            </Link>
+                </TiltCard>
+              </Link>
+            </StaggerItem>
           );
         })}
         {filtered.length === 0 && (
           <p className="col-span-3 text-sm text-[#444] text-center py-12">No builders found.</p>
         )}
-      </div>
-    </div>
+      </StaggerList>
+    </PageTransition>
   );
 }
 

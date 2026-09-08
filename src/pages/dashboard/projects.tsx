@@ -9,6 +9,9 @@ import { useAppStore, STATUS_PROGRESSION } from "@/store/AppStore";
 import { Modal } from "@/components/platform/Modal";
 import { Link, useParams, useLocation } from "wouter";
 import { ArrowLeft, GitBranch, ExternalLink, Plus, ChevronRight, LogIn, Check } from "lucide-react";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 // ─── STATUS HELPERS ───────────────────────────────────────────────────────────
 
@@ -291,7 +294,7 @@ function ProjectDetail({ projectId }: { projectId: string }) {
   const nextColor = nextStatus ? (statusTextColors[nextStatus] || "#999") : null;
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       <Link href="/app/projects" className="flex items-center gap-2 text-xs font-mono text-[#555] hover:text-[#878787] transition-colors w-fit">
         <ArrowLeft className="h-3.5 w-3.5" /> ALL PROJECTS
       </Link>
@@ -389,27 +392,29 @@ function ProjectDetail({ projectId }: { projectId: string }) {
           {/* Team */}
           <section>
             <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-4">TEAM</h2>
-            <div className="space-y-3">
+            <StaggerList className="space-y-3">
               {project.members.map((member) => {
                 const builder = getBuilderById(member.builderId);
                 return builder ? (
-                  <Link key={member.builderId} href={`/app/builders/${builder.id}`}>
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
-                      <img src={builder.avatar} alt={builder.name}
-                        className="w-8 h-8 rounded-full border border-[#2A2A2A] shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{builder.name}</p>
-                        <p className="text-[9px] font-mono text-[#555]">{member.role}</p>
-                      </div>
-                      <p className="text-[9px] font-mono text-[#444]">{builder.campus}</p>
-                    </div>
-                  </Link>
+                  <StaggerItem key={member.builderId}>
+                    <Link href={`/app/builders/${builder.id}`}>
+                      <TiltCard className="flex items-center gap-3 p-3 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group">
+                        <img src={builder.avatar} alt={builder.name}
+                          className="w-8 h-8 rounded-full border border-[#2A2A2A] shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{builder.name}</p>
+                          <p className="text-[9px] font-mono text-[#555]">{member.role}</p>
+                        </div>
+                        <p className="text-[9px] font-mono text-[#444]">{builder.campus}</p>
+                      </TiltCard>
+                    </Link>
+                  </StaggerItem>
                 ) : null;
               })}
               {project.members.length === 0 && (
                 <p className="text-sm text-[#444]">No team members yet.</p>
               )}
-            </div>
+            </StaggerList>
           </section>
         </div>
 
@@ -459,7 +464,7 @@ function ProjectDetail({ projectId }: { projectId: string }) {
       </div>
 
       {project && <JoinProjectModal open={joinOpen} project={project} onClose={() => setJoinOpen(false)} />}
-    </div>
+    </PageTransition>
   );
 }
 
@@ -482,7 +487,7 @@ export function ProjectsPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
@@ -510,56 +515,58 @@ export function ProjectsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((project) => {
           const color = statusTextColors[project.status] || "#999";
           return (
-            <Link key={project.id} href={`/app/projects/${project.id}`}>
-              <div className="rounded-xl border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full flex flex-col overflow-hidden">
-                <div className="h-24 flex items-end p-4" style={{ background: project.coverColor }}>
-                  <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
-                    style={{ color, borderColor: `${color}40`, background: `${color}15` }}>
-                    {project.status}
-                  </span>
-                </div>
-                <div className="p-4 bg-[#141414] flex-1 flex flex-col">
-                  <h3 className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{project.title}</h3>
-                  <p className="text-xs text-[#555] mt-1">{project.tagline}</p>
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {project.techStack.slice(0, 3).map((t) => (
-                      <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
-                    ))}
-                  </div>
-                  <div className="mt-auto pt-3 flex items-center justify-between border-t border-[#1F1F1F] mt-4">
-                    <div className="flex -space-x-1.5">
-                      {project.members.slice(0, 3).map((m) => {
-                        const b = getBuilderById(m.builderId);
-                        return b ? (
-                          <img key={b.id} src={b.avatar} alt={b.name}
-                            className="w-5 h-5 rounded-full border border-[#141414]" />
-                        ) : null;
-                      })}
-                    </div>
-                    <span className="text-[9px] font-mono text-[#444]">
-                      {project.members.length} MEMBER{project.members.length !== 1 ? "S" : ""}
+            <StaggerItem key={project.id}>
+              <Link href={`/app/projects/${project.id}`}>
+                <TiltCard className="rounded-xl border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full flex flex-col overflow-hidden">
+                  <div className="h-24 flex items-end p-4" style={{ background: project.coverColor }}>
+                    <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
+                      style={{ color, borderColor: `${color}40`, background: `${color}15` }}>
+                      {project.status}
                     </span>
                   </div>
-                </div>
-              </div>
-            </Link>
+                  <div className="p-4 bg-[#141414] flex-1 flex flex-col">
+                    <h3 className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{project.title}</h3>
+                    <p className="text-xs text-[#555] mt-1">{project.tagline}</p>
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {project.techStack.slice(0, 3).map((t) => (
+                        <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
+                      ))}
+                    </div>
+                    <div className="mt-auto pt-3 flex items-center justify-between border-t border-[#1F1F1F] mt-4">
+                      <div className="flex -space-x-1.5">
+                        {project.members.slice(0, 3).map((m) => {
+                          const b = getBuilderById(m.builderId);
+                          return b ? (
+                            <img key={b.id} src={b.avatar} alt={b.name}
+                              className="w-5 h-5 rounded-full border border-[#141414]" />
+                          ) : null;
+                        })}
+                      </div>
+                      <span className="text-[9px] font-mono text-[#444]">
+                        {project.members.length} MEMBER{project.members.length !== 1 ? "S" : ""}
+                      </span>
+                    </div>
+                  </div>
+                </TiltCard>
+              </Link>
+            </StaggerItem>
           );
         })}
         {filtered.length === 0 && (
           <p className="col-span-3 text-sm text-[#444] text-center py-12">No projects found.</p>
         )}
-      </div>
+      </StaggerList>
 
       <CreateProjectModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={(id) => navigate(`/app/projects/${id}`)}
       />
-    </div>
+    </PageTransition>
   );
 }
 

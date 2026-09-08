@@ -3,6 +3,9 @@ import { mockBuilders, getBuilderById, statusTextColors } from "@/data/mock";
 import { useAppStore } from "@/store/AppStore";
 import { Link } from "wouter";
 import { ExternalLink, GitBranch, Star } from "lucide-react";
+import { PageTransition } from "@/components/ui/motion/PageTransition";
+import { StaggerList, StaggerItem } from "@/components/ui/motion/StaggerList";
+import { TiltCard } from "@/components/ui/motion/TiltCard";
 
 export function ShowcasePage() {
   const { state } = useAppStore();
@@ -21,7 +24,7 @@ export function ShowcasePage() {
   );
 
   return (
-    <div className="space-y-12">
+    <PageTransition className="space-y-12">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
@@ -53,76 +56,78 @@ export function ShowcasePage() {
           <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">
             {filter === "ALL" ? "SHIPPED & MAINTAINED" : filter}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <StaggerList className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {displayFeatured.map((project) => {
               const owner = getBuilderById(project.ownerId);
               const color = statusTextColors[project.status] || "#3ACA7A";
               return (
-                <div key={project.id} className="rounded-2xl border border-[#1F1F1F] overflow-hidden group">
-                  {/* Cover */}
-                  <div className="h-32 relative flex items-end p-5" style={{ background: project.coverColor }}>
-                    <div className="absolute inset-0 opacity-20"
-                      style={{ background: "linear-gradient(135deg, rgba(137,170,204,0.2), transparent)" }} />
-                    <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border relative z-10"
-                      style={{ color, borderColor: `${color}40`, background: `${color}15` }}>
-                      {project.status}
-                    </span>
-                  </div>
+                <StaggerItem key={project.id}>
+                  <TiltCard className="rounded-2xl border border-[#1F1F1F] overflow-hidden group">
+                    {/* Cover */}
+                    <div className="h-32 relative flex items-end p-5" style={{ background: project.coverColor }}>
+                      <div className="absolute inset-0 opacity-20"
+                        style={{ background: "linear-gradient(135deg, rgba(137,170,204,0.2), transparent)" }} />
+                      <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border relative z-10"
+                        style={{ color, borderColor: `${color}40`, background: `${color}15` }}>
+                        {project.status}
+                      </span>
+                    </div>
 
-                  <div className="p-5 bg-[#141414]">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <Link href={`/app/projects/${project.id}`}>
-                        <h3 className="text-lg font-medium hover:text-[#89AACC] transition-colors cursor-pointer">
-                          {project.title}
-                        </h3>
-                      </Link>
-                      <div className="flex gap-1.5 shrink-0">
-                        {project.repoUrl && (
-                          <a href={`https://${project.repoUrl}`} target="_blank" rel="noreferrer"
-                            className="p-1.5 rounded-lg border border-[#1F1F1F] text-[#555] hover:text-[#F5F5F5] transition-colors">
-                            <GitBranch className="h-3.5 w-3.5" />
-                          </a>
-                        )}
-                        {project.demoUrl && (
-                          <a href={`https://${project.demoUrl}`} target="_blank" rel="noreferrer"
-                            className="p-1.5 rounded-lg border border-[#89AACC]/30 text-[#89AACC] hover:border-[#89AACC] transition-colors">
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
+                    <div className="p-5 bg-[#141414]">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <Link href={`/app/projects/${project.id}`}>
+                          <h3 className="text-lg font-medium hover:text-[#89AACC] transition-colors cursor-pointer">
+                            {project.title}
+                          </h3>
+                        </Link>
+                        <div className="flex gap-1.5 shrink-0">
+                          {project.repoUrl && (
+                            <a href={`https://${project.repoUrl}`} target="_blank" rel="noreferrer"
+                              className="p-1.5 rounded-lg border border-[#1F1F1F] text-[#555] hover:text-[#F5F5F5] transition-colors">
+                              <GitBranch className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                          {project.demoUrl && (
+                            <a href={`https://${project.demoUrl}`} target="_blank" rel="noreferrer"
+                              className="p-1.5 rounded-lg border border-[#89AACC]/30 text-[#89AACC] hover:border-[#89AACC] transition-colors">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-[#555] mb-4">{project.tagline}</p>
+
+                      {/* Team */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex -space-x-1.5">
+                          {project.members.slice(0, 4).map((m) => {
+                            const b = getBuilderById(m.builderId);
+                            return b ? (
+                              <img key={b.id} src={b.avatar} alt={b.name}
+                                className="w-6 h-6 rounded-full border border-[#141414]" />
+                            ) : null;
+                          })}
+                        </div>
+                        {owner && (
+                          <span className="text-xs text-[#555]">
+                            by {owner.name}
+                            {project.members.length > 1 ? ` + ${project.members.length - 1} more` : ""}
+                          </span>
                         )}
                       </div>
-                    </div>
-                    <p className="text-sm text-[#555] mb-4">{project.tagline}</p>
 
-                    {/* Team */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex -space-x-1.5">
-                        {project.members.slice(0, 4).map((m) => {
-                          const b = getBuilderById(m.builderId);
-                          return b ? (
-                            <img key={b.id} src={b.avatar} alt={b.name}
-                              className="w-6 h-6 rounded-full border border-[#141414]" />
-                          ) : null;
-                        })}
+                      {/* Tech */}
+                      <div className="flex flex-wrap gap-1">
+                        {project.techStack.slice(0, 4).map((t) => (
+                          <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
+                        ))}
                       </div>
-                      {owner && (
-                        <span className="text-xs text-[#555]">
-                          by {owner.name}
-                          {project.members.length > 1 ? ` + ${project.members.length - 1} more` : ""}
-                        </span>
-                      )}
                     </div>
-
-                    {/* Tech */}
-                    <div className="flex flex-wrap gap-1">
-                      {project.techStack.slice(0, 4).map((t) => (
-                        <span key={t} className="text-[9px] font-mono text-[#555] border border-[#1F1F1F] rounded px-1.5 py-0.5">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                  </TiltCard>
+                </StaggerItem>
               );
             })}
-          </div>
+          </StaggerList>
         </section>
       ) : (
         <div className="text-center py-16 text-[#444] font-mono text-sm">
@@ -134,34 +139,36 @@ export function ShowcasePage() {
       {activeBuild.length > 0 && filter === "ALL" && (
         <section>
           <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">ACTIVE BUILDS</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StaggerList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeBuild.map((project) => {
               const color = statusTextColors[project.status] || "#999";
               return (
-                <Link key={project.id} href={`/app/projects/${project.id}`}>
-                  <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full flex flex-col">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
-                        style={{ color, borderColor: `${color}40`, background: `${color}10` }}>
-                        {project.status}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{project.title}</h3>
-                    <p className="text-xs text-[#555] mt-1 flex-1">{project.tagline}</p>
-                    <div className="flex -space-x-1.5 mt-3">
-                      {project.members.slice(0, 3).map((m) => {
-                        const b = getBuilderById(m.builderId);
-                        return b ? (
-                          <img key={b.id} src={b.avatar} alt={b.name}
-                            className="w-5 h-5 rounded-full border border-[#141414]" />
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
-                </Link>
+                <StaggerItem key={project.id}>
+                  <Link href={`/app/projects/${project.id}`}>
+                    <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group h-full flex flex-col">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 rounded border"
+                          style={{ color, borderColor: `${color}40`, background: `${color}10` }}>
+                          {project.status}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-medium group-hover:text-[#89AACC] transition-colors">{project.title}</h3>
+                      <p className="text-xs text-[#555] mt-1 flex-1">{project.tagline}</p>
+                      <div className="flex -space-x-1.5 mt-3">
+                        {project.members.slice(0, 3).map((m) => {
+                          const b = getBuilderById(m.builderId);
+                          return b ? (
+                            <img key={b.id} src={b.avatar} alt={b.name}
+                              className="w-5 h-5 rounded-full border border-[#141414]" />
+                          ) : null;
+                        })}
+                      </div>
+                    </TiltCard>
+                  </Link>
+                </StaggerItem>
               );
             })}
-          </div>
+          </StaggerList>
         </section>
       )}
 
@@ -169,20 +176,22 @@ export function ShowcasePage() {
       {filter === "ALL" && (
         <section>
           <h2 className="text-xs font-mono tracking-widest text-[#878787] mb-6">FEATURED BUILDERS</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <StaggerList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {mockBuilders.map((builder) => (
-              <Link key={builder.id} href={`/app/builders/${builder.id}`}>
-                <div className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
-                  <img src={builder.avatar} alt={builder.name}
-                    className="w-12 h-12 rounded-full mx-auto mb-2 border border-[#2A2A2A] group-hover:border-[#89AACC]/40 transition-colors" />
-                  <p className="text-xs font-medium group-hover:text-[#89AACC] transition-colors truncate">{builder.name}</p>
-                  <p className="text-[8px] font-mono text-[#444] mt-0.5">{builder.role}</p>
-                </div>
-              </Link>
+              <StaggerItem key={builder.id}>
+                <Link href={`/app/builders/${builder.id}`}>
+                  <TiltCard className="p-4 rounded-xl bg-[#141414] border border-[#1F1F1F] hover:border-[#2A2A2A] transition-colors cursor-pointer group text-center">
+                    <img src={builder.avatar} alt={builder.name}
+                      className="w-12 h-12 rounded-full mx-auto mb-2 border border-[#2A2A2A] group-hover:border-[#89AACC]/40 transition-colors" />
+                    <p className="text-xs font-medium group-hover:text-[#89AACC] transition-colors truncate">{builder.name}</p>
+                    <p className="text-[8px] font-mono text-[#444] mt-0.5">{builder.role}</p>
+                  </TiltCard>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerList>
         </section>
       )}
-    </div>
+    </PageTransition>
   );
 }
