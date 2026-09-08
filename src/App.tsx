@@ -9,6 +9,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { initData, externalLinks, type Exploration, type NetworkNode } from '@/data/init';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import { BuildersCarousel } from '@/components/landing/BuildersCarousel';
 
 const queryClient = new QueryClient();
 gsap.registerPlugin(ScrollTrigger);
@@ -312,24 +313,7 @@ function Chapters() {
 }
 
 function Team() {
-  return (
-    <section className="section team-section" id="team" aria-labelledby="team-heading">
-      <div className="container-wide">
-        <div className="team-section__heading">
-          <div><div className="section-label">06 / THE TEAM</div><h2 className="section-title" id="team-heading">Meet the builders<br /><em>behind INIT.</em></h2></div>
-          <p className="section-intro-copy">The people turning a shared instinct into a living network.</p>
-        </div>
-        <div className="team-grid">
-          {initData.team.map((member, index) => <article className="team-card glass-hover" key={member.role}>
-            <div className="team-card__portrait"><span>0{index + 1}</span><div className="team-card__signal" /></div>
-            <div className="team-card__role">{member.role}</div>
-            <h3>{member.name}</h3>
-            <p>{member.detail}</p>
-          </article>)}
-        </div>
-      </div>
-    </section>
-  );
+  return <BuildersCarousel />;
 }
 
 function Builds() {
